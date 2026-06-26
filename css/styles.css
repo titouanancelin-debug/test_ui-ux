@@ -384,22 +384,28 @@ a { color: inherit; }
   animation: ci-unmask 0.85s cubic-bezier(0.16,1,0.3,1) 0.5s both;
 }
 
-/* Compteur % en bas à droite façon studio */
-.curtain-counter {
-  position: fixed; right: clamp(20px,3vw,52px); bottom: clamp(20px,3vw,52px);
-  font-family: var(--ff-mono); font-size: clamp(56px,8vw,120px);
-  color: rgba(244,232,213,0.22); font-weight: 500; line-height: 1;
+/* Physalis qui pousse — SVG positionné sur la droite, pleine hauteur */
+.growing-plant {
+  position: absolute;
+  right: 0; top: 0;
+  height: 100%;
+  width: auto;
+  max-width: min(32vw, 300px);
   pointer-events: none;
-  opacity: 0; animation: ci-rise 0.4s ease 0.2s both;
 }
-
-/* Motif physalis décoratif */
-.curtain-motif {
-  position: absolute; right: -180px; top: -60px;
-  width: 280px; height: 300px;
-  pointer-events: none; overflow: visible;
-  opacity: 0; animation: ci-rise 1s ease 0.7s both;
+/* Tiges (stems) — JS règle stroke-dasharray/dashoffset */
+.gp-path {
+  fill: none;
+  stroke: rgba(244,232,213,0.78);
+  stroke-width: 2.2;
+  stroke-linecap: round;
 }
+/* Lanternes — masquées au départ, JS ajoute .gp-in pour fade-in */
+.gp-lantern {
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.gp-lantern.gp-in { opacity: 1; }
 
 @keyframes ci-rise {
   from { opacity: 0; transform: translateY(8px); }

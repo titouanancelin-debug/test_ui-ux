@@ -145,28 +145,85 @@ const initFX = () => {
   }
   document.body.classList.add("curtain-active");
 
-  // --- Compteur 0 → 100 animé, puis clip-path monte (style loading overlay studio) ---
-  const counter = document.getElementById("curtain-counter");
-  const dur = 2000;          // durée du compteur
-  const startTime = performance.now();
-  const ease = t => t < 0.5 ? 2*t*t : -1+(4-2*t)*t;  // ease-in-out quad
+  // --- Physalis qui pousse : tige + branches + lanternes au rAF ---
+  // Récupère les éléments SVG
+  const gpStem = document.getElementById("gp-stem");
+  const gpBranches = [1,2,3,4].map(i => document.getElementById(`gp-b${i}`));
+  const gpLanterns = [1,2,3,4,5].map(i => document.getElementById(`gp-l${i}`));
 
-  const tick = (now) => {
-    const p = Math.min((now - startTime) / dur, 1);
-    const val = Math.round(ease(p) * 100);
-    if (counter) counter.textContent = val;
-    if (p < 1) { requestAnimationFrame(tick); return; }
-    // Compteur atteint 100 : panel monte via clip-path
-    window.setTimeout(() => {
-      curtain.classList.add("curtain-exit");
-      document.body.classList.remove("curtain-active");
-    }, 120);
-    window.setTimeout(() => {
-      curtain.remove();
-      sessionStorage.setItem("rt-curtain-seen", "1");
-    }, 900);
+  if (!gpStem) return;
+
+  // Mémorise les longueurs (après premier paint)
+  const initLengths = () => {
+    const stemLen = gpStem.getTotalLength();
+    gpStem.style.strokeDasharray = stemLen;
+    gpStem.style.strokeDashoffset = stemLen;
+    const bLens = gpBranches.map(b => {
+      const l = b.getTotalLength();
+      b.style.strokeDasharray = l;
+      b.style.strokeDashoffset = l;
+      return l;
+    });
+
+    const TOTAL = 3000;    // durée totale de l'animation (ms)
+    const startT = performance.now();
+    const ease = t => t < 0.5 ? 2*t*t : -1+(4-2*t)*t;  // ease-in-out
+    // Segments : [progressStart, progressEnd]
+    // Tige : 0 → 0.72 | branches : décalées en chevauchant la tige
+    const segments = [
+      { el: gpStem,       len: stemLen, s: 0,    e: 0.72 },
+      { el: gpBranches[0], len: bLens[0], s: 0.20, e: 0.42 },
+      { el: gpBranches[1], len: bLens[1], s: 0.36, e: 0.56 },
+      { el: gpBranches[2], len: bLens[2], s: 0.50, e: 0.68 },
+      { el: gpBranches[3], len: bLens[3], s: 0.62, e: 0.80 },
+    ];
+    // Lanternes révélées à la fin de chaque branche/tige
+    const reveals = [
+      { at: 0.44, el: gpLanterns[0] },   // bout branche 1
+      { at: 0.58, el: gpLanterns[1] },   // bout branche 2
+      { at: 0.70, el: gpLanterns[2] },   // bout branche 3
+      { at: 0.82, el: gpLanterns[3] },   // bout branche 4
+      { at: 0.74, el: gpLanterns[4] },   // sommet tige
+    ];
+    const revealed = new Set();
+
+    const tick = (now) => {
+      const rawP = (now - startT) / TOTAL;
+      const p = Math.min(rawP, 1);
+      const ep = ease(p);
+
+      // Animer chaque segment
+      segments.forEach(seg => {
+        if (ep < seg.s) return;
+        const sp = Math.min((ep - seg.s) / (seg.e - seg.s), 1);
+        seg.el.style.strokeDashoffset = seg.len * (1 - sp);
+      });
+
+      // Révéler les lanternes aux seuils
+      reveals.forEach(r => {
+        if (ep >= r.at && !revealed.has(r.at)) {
+          revealed.add(r.at);
+          r.el.classList.add("gp-in");
+        }
+      });
+
+      if (p < 1) { requestAnimationFrame(tick); return; }
+
+      // Plante complète — pause courte puis clip-path monte
+      window.setTimeout(() => {
+        curtain.classList.add("curtain-exit");
+        document.body.classList.remove("curtain-active");
+      }, 500);
+      window.setTimeout(() => {
+        curtain.remove();
+        sessionStorage.setItem("rt-curtain-seen", "1");
+      }, 1300);
+    };
+    requestAnimationFrame(tick);
   };
-  requestAnimationFrame(tick);
+
+  // Attendre le premier paint pour que getTotalLength() soit disponible
+  requestAnimationFrame(() => requestAnimationFrame(initLengths));
 };
 
 window.prefersReduced = prefersReduced;

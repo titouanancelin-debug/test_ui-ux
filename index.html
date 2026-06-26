@@ -12,41 +12,78 @@
 </head>
 <body class="app-root">
 
-<!-- Intro overlay — terracotta + nom qui se révèle, puis monte -->
+<!-- Intro overlay — terracotta + physalis qui pousse -->
 <div id="curtain" class="curtain" aria-hidden="true">
   <div class="curtain-inner">
     <div class="curtain-eyebrow">Compagnie de théâtre · Toulon</div>
     <div class="curtain-title-wrap">
       <span class="curtain-title">Cie Rouletabille</span>
     </div>
-    <div class="curtain-counter" id="curtain-counter">0</div>
-    <!-- Physalis décoratif en SVG, discret -->
-    <svg class="curtain-motif" viewBox="0 0 280 300" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <g opacity="0.18">
-        <path d="M150,300 C148,260 145,235 142,205" stroke="#F4E8D5" stroke-width="3" fill="none" stroke-linecap="round"/>
-        <path d="M143,225 C118,196 86,150 60,108" stroke="#F4E8D5" stroke-width="2.2" fill="none" stroke-linecap="round"/>
-        <path d="M145,212 C168,184 204,140 230,96" stroke="#F4E8D5" stroke-width="2.2" fill="none" stroke-linecap="round"/>
-        <g transform="translate(142,205) scale(0.72)">
-          <path d="M0,66 C-52,48 -75,6 -50,-34 C-28,-56 0,-66 0,-66" stroke="#F4E8D5" stroke-width="1.8" fill="none"/>
-          <path d="M0,66 C52,48 75,6 50,-34 C28,-56 0,-66 0,-66" stroke="#F4E8D5" stroke-width="1.8" fill="none"/>
-          <path d="M0,66 C1,34 0,-16 0,-66" stroke="#F4E8D5" stroke-width="1.2" fill="none" opacity="0.6"/>
-          <path d="M-42,36 C-15,28 15,28 42,36" stroke="#F4E8D5" stroke-width="1" fill="none" opacity="0.55"/>
-          <path d="M-60,10 C-24,2 24,2 60,10" stroke="#F4E8D5" stroke-width="1" fill="none" opacity="0.5"/>
-          <ellipse cx="0" cy="0" rx="22" ry="24" fill="#F4E8D5" opacity="0.6"/>
-        </g>
-        <g transform="translate(60,108) scale(0.5)">
-          <path d="M0,66 C-52,48 -75,6 -50,-34 C-28,-56 0,-66 0,-66" stroke="#F4E8D5" stroke-width="1.8" fill="none"/>
-          <path d="M0,66 C52,48 75,6 50,-34 C28,-56 0,-66 0,-66" stroke="#F4E8D5" stroke-width="1.8" fill="none"/>
-          <ellipse cx="0" cy="0" rx="22" ry="24" fill="#F4E8D5" opacity="0.6"/>
-        </g>
-        <g transform="translate(230,96) scale(0.46)">
-          <path d="M0,66 C-52,48 -75,6 -50,-34 C-28,-56 0,-66 0,-66" stroke="#F4E8D5" stroke-width="1.8" fill="none"/>
-          <path d="M0,66 C52,48 75,6 50,-34 C28,-56 0,-66 0,-66" stroke="#F4E8D5" stroke-width="1.8" fill="none"/>
-          <ellipse cx="0" cy="0" rx="22" ry="24" fill="#F4E8D5" opacity="0.6"/>
-        </g>
-      </g>
-    </svg>
   </div>
+
+  <!-- Physalis qui grimpe le long du bord droit -->
+  <svg id="growing-plant" class="growing-plant"
+       viewBox="0 0 260 920" preserveAspectRatio="xMidYMax meet"
+       xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <defs>
+      <!-- Réutilisable : une lanterne physalis, origine = point d'accroche tige, baie à -66 -->
+      <g id="gpl">
+        <path d="M0,0 C-52,-18,-75,-60,-50,-100 C-28,-122,0,-132,0,-132" stroke="#F4E8D5" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.9"/>
+        <path d="M0,0 C52,-18,75,-60,50,-100 C28,-122,0,-132,0,-132"  stroke="#F4E8D5" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.9"/>
+        <path d="M0,0 C-26,-14,-44,-52,-28,-92 C-14,-118,0,-132,0,-132" stroke="#F4E8D5" stroke-width="1.4" fill="none" stroke-linecap="round" opacity="0.7"/>
+        <path d="M0,0 C26,-14,44,-52,28,-92 C14,-118,0,-132,0,-132"   stroke="#F4E8D5" stroke-width="1.4" fill="none" stroke-linecap="round" opacity="0.7"/>
+        <path d="M0,0 C1,-32,0,-82,0,-132" stroke="#F4E8D5" stroke-width="1.1" fill="none" stroke-linecap="round" opacity="0.55"/>
+        <path d="M-42,-30 C-15,-38,15,-38,42,-30" stroke="#F4E8D5" stroke-width="0.95" fill="none" opacity="0.55"/>
+        <path d="M-60,-56 C-24,-64,24,-64,60,-56" stroke="#F4E8D5" stroke-width="0.85" fill="none" opacity="0.5"/>
+        <path d="M-64,-82 C-24,-90,24,-90,64,-82" stroke="#F4E8D5" stroke-width="0.75" fill="none" opacity="0.4"/>
+        <ellipse cx="0" cy="-66" rx="22" ry="24" fill="#E8571A" opacity="0.92"/>
+        <ellipse cx="-7" cy="-74" rx="6" ry="7" fill="rgba(255,255,255,0.22)"/>
+        <circle cx="0" cy="-132" r="3" fill="#F4E8D5" opacity="0.6"/>
+      </g>
+    </defs>
+
+    <!-- tige principale, du bas vers le haut -->
+    <path id="gp-stem" class="gp-path"
+      d="M130,930 C128,840 124,760 130,670 C136,580 122,490 128,390 C134,290 118,200 125,110 C128,60 130,20 130,20"/>
+
+    <!-- branche gauche basse (autour de y=680) -->
+    <path id="gp-b1" class="gp-path"
+      d="M130,680 C104,658 70,630 38,598"/>
+
+    <!-- branche droite (autour de y=490) -->
+    <path id="gp-b2" class="gp-path"
+      d="M128,490 C156,468 192,444 224,418"/>
+
+    <!-- branche gauche haute (autour de y=300) -->
+    <path id="gp-b3" class="gp-path"
+      d="M126,300 C98,276 62,248 30,220"/>
+
+    <!-- branche droite haute (autour de y=150) -->
+    <path id="gp-b4" class="gp-path"
+      d="M127,150 C158,128 192,106 222,88"/>
+
+    <!-- Lanternes — initialement invisibles, révélées par JS -->
+    <!-- L1 : bout branche gauche basse — scale 0.45 -->
+    <g id="gp-l1" class="gp-lantern" transform="translate(38,598) scale(0.45)">
+      <use href="#gpl"/>
+    </g>
+    <!-- L2 : bout branche droite — scale 0.5 -->
+    <g id="gp-l2" class="gp-lantern" transform="translate(224,418) scale(0.5)">
+      <use href="#gpl"/>
+    </g>
+    <!-- L3 : bout branche gauche haute — scale 0.52 -->
+    <g id="gp-l3" class="gp-lantern" transform="translate(30,220) scale(0.52)">
+      <use href="#gpl"/>
+    </g>
+    <!-- L4 : bout branche droite haute — scale 0.44 -->
+    <g id="gp-l4" class="gp-lantern" transform="translate(222,88) scale(0.44)">
+      <use href="#gpl"/>
+    </g>
+    <!-- L5 : sommet tige principale — scale 0.6, grande -->
+    <g id="gp-l5" class="gp-lantern" transform="translate(130,20) scale(0.6)">
+      <use href="#gpl"/>
+    </g>
+  </svg>
 </div>
 
 <!-- Barre de progression de lecture -->
