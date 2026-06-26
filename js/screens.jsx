@@ -51,7 +51,7 @@ const HERO_F0   = "images/p2.jpg";
 const HERO_F1   = "images/p3.jpg";
 const HERO_F2   = "images/p4.jpg";
 
-const SCROLL_H = 1400;
+const SCROLL_H = 2200;
 
 const ParallaxHero = ({ setRoute }) => {
   const centerRef = useRef(null);
