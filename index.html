@@ -12,41 +12,40 @@
 </head>
 <body class="app-root">
 
-<!-- Intro botanique — volée de physalis -->
+<!-- Intro overlay — terracotta + nom qui se révèle, puis monte -->
 <div id="curtain" class="curtain" aria-hidden="true">
-  <svg class="bloom-svg" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <defs>
-      <radialGradient id="bg-glow" cx="50%" cy="46%" r="55%">
-        <stop offset="0%" stop-color="#7A3A50" stop-opacity="0.55"/>
-        <stop offset="100%" stop-color="#2A1020" stop-opacity="0"/>
-      </radialGradient>
-      <radialGradient id="berry-grad" cx="35%" cy="32%" r="68%">
-        <stop offset="0%" stop-color="#F07040"/>
-        <stop offset="48%" stop-color="#C8481E"/>
-        <stop offset="100%" stop-color="#8E3010"/>
-      </radialGradient>
-      <!-- Une physalis complète : cage de nervures + baie. Origine = centre de la baie. -->
-      <g id="physalis">
-        <path class="ph-rib" d="M0,66 C-52,48 -75,6 -50,-34 C-28,-56 0,-66 0,-66"/>
-        <path class="ph-rib" d="M0,66 C52,48 75,6 50,-34 C28,-56 0,-66 0,-66"/>
-        <path class="ph-rib" d="M0,66 C-26,52 -44,14 -28,-26 C-14,-52 0,-66 0,-66" opacity="0.78"/>
-        <path class="ph-rib" d="M0,66 C26,52 44,14 28,-26 C14,-52 0,-66 0,-66" opacity="0.78"/>
-        <path class="ph-rib" d="M0,66 C1,34 0,-16 0,-66" opacity="0.6"/>
-        <path class="ph-vein" d="M-42,36 C-15,28 15,28 42,36"/>
-        <path class="ph-vein" d="M-60,10 C-24,2 24,2 60,10"/>
-        <path class="ph-vein" d="M-64,-16 C-24,-24 24,-24 64,-16"/>
-        <path class="ph-vein" d="M-46,-40 C-18,-47 18,-47 46,-40"/>
-        <ellipse class="ph-berry" cx="0" cy="0" rx="25" ry="27" fill="url(#berry-grad)"/>
-        <ellipse class="ph-berry" cx="-8" cy="-8" rx="7" ry="8" fill="rgba(255,255,255,0.22)"/>
-        <circle class="ph-bud" cx="0" cy="-66" r="3.2"/>
+  <div class="curtain-inner">
+    <div class="curtain-eyebrow">Compagnie de théâtre · Toulon</div>
+    <div class="curtain-title-wrap">
+      <span class="curtain-title">Cie Rouletabille</span>
+    </div>
+    <div class="curtain-counter" id="curtain-counter">0</div>
+    <!-- Physalis décoratif en SVG, discret -->
+    <svg class="curtain-motif" viewBox="0 0 280 300" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <g opacity="0.18">
+        <path d="M150,300 C148,260 145,235 142,205" stroke="#F4E8D5" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <path d="M143,225 C118,196 86,150 60,108" stroke="#F4E8D5" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+        <path d="M145,212 C168,184 204,140 230,96" stroke="#F4E8D5" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+        <g transform="translate(142,205) scale(0.72)">
+          <path d="M0,66 C-52,48 -75,6 -50,-34 C-28,-56 0,-66 0,-66" stroke="#F4E8D5" stroke-width="1.8" fill="none"/>
+          <path d="M0,66 C52,48 75,6 50,-34 C28,-56 0,-66 0,-66" stroke="#F4E8D5" stroke-width="1.8" fill="none"/>
+          <path d="M0,66 C1,34 0,-16 0,-66" stroke="#F4E8D5" stroke-width="1.2" fill="none" opacity="0.6"/>
+          <path d="M-42,36 C-15,28 15,28 42,36" stroke="#F4E8D5" stroke-width="1" fill="none" opacity="0.55"/>
+          <path d="M-60,10 C-24,2 24,2 60,10" stroke="#F4E8D5" stroke-width="1" fill="none" opacity="0.5"/>
+          <ellipse cx="0" cy="0" rx="22" ry="24" fill="#F4E8D5" opacity="0.6"/>
+        </g>
+        <g transform="translate(60,108) scale(0.5)">
+          <path d="M0,66 C-52,48 -75,6 -50,-34 C-28,-56 0,-66 0,-66" stroke="#F4E8D5" stroke-width="1.8" fill="none"/>
+          <path d="M0,66 C52,48 75,6 50,-34 C28,-56 0,-66 0,-66" stroke="#F4E8D5" stroke-width="1.8" fill="none"/>
+          <ellipse cx="0" cy="0" rx="22" ry="24" fill="#F4E8D5" opacity="0.6"/>
+        </g>
+        <g transform="translate(230,96) scale(0.46)">
+          <path d="M0,66 C-52,48 -75,6 -50,-34 C-28,-56 0,-66 0,-66" stroke="#F4E8D5" stroke-width="1.8" fill="none"/>
+          <path d="M0,66 C52,48 75,6 50,-34 C28,-56 0,-66 0,-66" stroke="#F4E8D5" stroke-width="1.8" fill="none"/>
+          <ellipse cx="0" cy="0" rx="22" ry="24" fill="#F4E8D5" opacity="0.6"/>
+        </g>
       </g>
-    </defs>
-    <rect x="0" y="0" width="1440" height="900" fill="url(#bg-glow)"/>
-    <!-- Les <use> sont injectés/animés par initFX (positions, échelles, oscillation) -->
-    <g id="physalis-field"></g>
-  </svg>
-  <div class="curtain-mark">
-    <span class="curtain-word">Cie Rouletabille</span>
+    </svg>
   </div>
 </div>
 
