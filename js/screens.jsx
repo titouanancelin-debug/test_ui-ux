@@ -46,10 +46,10 @@ const Nav = ({ route, setRoute }) => {
  *   HERO_F1    : photo flottante droite (portrait)
  *   HERO_F2    : photo flottante gauche basse (portrait)
  */
-const HERO_MAIN = "https://images.unsplash.com/photo-1516307365426-bea591f05011?w=1800&q=80";
-const HERO_F0   = "https://images.unsplash.com/photo-1503095396549-807759245b35?w=700&q=80";
-const HERO_F1   = "https://images.unsplash.com/photo-1460723237483-7a6dc9d0b212?w=700&q=80";
-const HERO_F2   = "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=700&q=80";
+const HERO_MAIN = "images/p1.jpg";
+const HERO_F0   = "images/p2.jpg";
+const HERO_F1   = "images/p3.jpg";
+const HERO_F2   = "images/p4.jpg";
 
 const SCROLL_H = 1400;
 
