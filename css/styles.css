@@ -542,3 +542,34 @@ body.curtain-active { overflow: hidden; }
 
 /* Smooth scroll global (ancres / retours haut de page) */
 html { scroll-behavior: smooth; }
+
+/* =====================================================================
+   Curseur custom — physalis lanterne
+   ===================================================================== */
+/* Cache le curseur natif sur desktop avec pointeur */
+@media (hover: hover) and (pointer: fine) {
+  body { cursor: none; }
+  a, button, [role="button"], label, .card-fx, .agenda-row, .nav-link, .nav-cta, .link-underline {
+    cursor: none;
+  }
+}
+
+#custom-cursor {
+  position: fixed;
+  top: 0; left: 0;
+  width: 40px; height: 52px;
+  pointer-events: none;
+  z-index: 99999;
+  transform: translate(-50%, -50%);
+  transition: opacity 0.25s ease;
+  opacity: 0;
+  will-change: transform;
+}
+#custom-cursor.cursor-visible { opacity: 1; }
+#custom-cursor.cursor-hover { transform: translate(-50%, -50%) scale(1.35); }
+#custom-cursor svg { width: 100%; height: 100%; overflow: visible; }
+
+@media (prefers-reduced-motion: reduce), (hover: none) {
+  #custom-cursor { display: none !important; }
+  body { cursor: auto; }
+}

@@ -90,6 +90,27 @@
 <!-- Barre de progression de lecture -->
 <div id="scroll-progress" class="scroll-progress" aria-hidden="true"></div>
 
+<!-- Curseur custom physalis -->
+<div id="custom-cursor" aria-hidden="true">
+  <svg viewBox="-70 -150 140 165" xmlns="http://www.w3.org/2000/svg">
+    <!-- Tige courte -->
+    <line x1="0" y1="0" x2="0" y2="14" stroke="#7A4828" stroke-width="2" stroke-linecap="round"/>
+    <!-- Nervures de la lanterne -->
+    <path d="M0,0 C-36,-12,-52,-42,-35,-72 C-20,-88,0,-94,0,-94" stroke="#C17A3A" stroke-width="1.6" fill="none" stroke-linecap="round" opacity="0.9"/>
+    <path d="M0,0 C36,-12,52,-42,35,-72 C20,-88,0,-94,0,-94"  stroke="#C17A3A" stroke-width="1.6" fill="none" stroke-linecap="round" opacity="0.9"/>
+    <path d="M0,0 C-18,-10,-30,-38,-20,-66 C-10,-84,0,-94,0,-94" stroke="#C17A3A" stroke-width="1.1" fill="none" stroke-linecap="round" opacity="0.7"/>
+    <path d="M0,0 C18,-10,30,-38,20,-66 C10,-84,0,-94,0,-94"   stroke="#C17A3A" stroke-width="1.1" fill="none" stroke-linecap="round" opacity="0.7"/>
+    <path d="M0,0 C0,-22,0,-60,0,-94" stroke="#C17A3A" stroke-width="0.9" fill="none" stroke-linecap="round" opacity="0.5"/>
+    <!-- Horizontales -->
+    <path d="M-30,-20 C-10,-26,10,-26,30,-20" stroke="#C17A3A" stroke-width="0.8" fill="none" opacity="0.55"/>
+    <path d="M-44,-42 C-16,-48,16,-48,44,-42" stroke="#C17A3A" stroke-width="0.7" fill="none" opacity="0.45"/>
+    <path d="M-46,-62 C-16,-68,16,-68,46,-62" stroke="#C17A3A" stroke-width="0.6" fill="none" opacity="0.38"/>
+    <!-- Baie -->
+    <ellipse cx="0" cy="-47" rx="16" ry="17" fill="#E8571A" opacity="0.95"/>
+    <ellipse cx="-5" cy="-53" rx="4.5" ry="5" fill="rgba(255,255,255,0.25)"/>
+  </svg>
+</div>
+
 <div id="root"></div>
 
 <script src="vendor/react.production.min.js"></script>
