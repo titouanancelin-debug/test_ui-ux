@@ -133,7 +133,7 @@ const initFX = () => {
     update();
   }
 
-  // --- Rideau de théâtre (une fois par session) ---
+  // --- Floraison botanique (une fois par session) ---
   const curtain = document.getElementById("curtain");
   if (!curtain) return;
   const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -144,15 +144,45 @@ const initFX = () => {
     return;
   }
   document.body.classList.add("curtain-active");
-  // Ouverture après un court temps de pose
+
+  // --- Animation JS de la floraison (rAF, plus fiable que CSS transform sur SVG) ---
+  const sepals = curtain.querySelectorAll('.sepal');
+  // ease-out-back : légère surtension en fin d'ouverture (effet ressort)
+  const easeOutBack = t => { const c = 1.70158 + 1; return 1 + c * Math.pow(t - 1, 3) + 1.70158 * Math.pow(t - 1, 2); };
+  const delays = [450, 500, 550, 550, 500];
+  const dur = 1250;
+  // angles finaux (positif = sens horaire, 3 = on fait -144 pour le chemin court)
+  const finalAngles = [0, 72, 144, -144, -72];
+
+  sepals.forEach((el, i) => {
+    const target = finalAngles[i];
+    const delay = delays[i];
+    const t0 = performance.now() + delay;
+    const tick = (now) => {
+      const elapsed = now - t0;
+      if (elapsed < 0) { requestAnimationFrame(tick); return; }
+      const p = Math.min(elapsed / dur, 1);
+      const angle = target * easeOutBack(p);
+      el.setAttribute('transform', `rotate(${angle.toFixed(2)}, 0, 0)`);
+      if (p < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  });
+
+  // Nervures : on retire la classe .sv-hidden après 1200ms pour déclencher l'animation CSS
   window.setTimeout(() => {
-    curtain.classList.add("curtain-open");
+    curtain.querySelectorAll('.sv').forEach(el => el.classList.add('sv-draw'));
+  }, 1150);
+
+  // Exit : fade-out après que la fleur est épanouie (~2.4s) et retrait du DOM
+  window.setTimeout(() => {
+    curtain.classList.add("curtain-exit");
     document.body.classList.remove("curtain-active");
-  }, 1100);
+  }, 3000);
   window.setTimeout(() => {
     curtain.remove();
     sessionStorage.setItem("rt-curtain-seen", "1");
-  }, 2700);
+  }, 4100);
 };
 
 window.prefersReduced = prefersReduced;

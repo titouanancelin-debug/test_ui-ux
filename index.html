@@ -12,21 +12,77 @@
 </head>
 <body class="app-root">
 
-<!-- Rideau de théâtre — intro -->
+<!-- Floraison botanique — intro -->
 <div id="curtain" class="curtain" aria-hidden="true">
-  <div class="curtain-panel curtain-left"></div>
-  <div class="curtain-panel curtain-right"></div>
+  <svg class="bloom-svg" viewBox="-260 -260 520 520" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <defs>
+      <radialGradient id="bg-glow" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#7A3A50" stop-opacity="0.6"/>
+        <stop offset="100%" stop-color="#3A1B2E" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="berry-grad" cx="35%" cy="35%" r="65%">
+        <stop offset="0%" stop-color="#F07040"/>
+        <stop offset="50%" stop-color="#C8481E"/>
+        <stop offset="100%" stop-color="#8E3010"/>
+      </radialGradient>
+    </defs>
+    <!-- ambient glow -->
+    <circle cx="0" cy="0" r="220" fill="url(#bg-glow)" class="bloom-glow"/>
+    <!-- Sepal 0 — all start pointing up (rotate 0), JS will animate to final angle -->
+    <g class="sepal" data-angle="0">
+      <path class="sepal-body" d="M0,0 C-22,-12 -36,-72 -28,-138 C-20,-188 -8,-218 0,-228 C8,-218 20,-188 28,-138 C36,-72 22,-12 0,0 Z"/>
+      <path class="sv" d="M0,-4 L0,-224"/>
+      <path class="sv" d="M-3,-42 C-10,-72 -14,-108 -8,-158"/>
+      <path class="sv" d="M3,-42 C10,-72 14,-108 8,-158"/>
+      <path class="sv" d="M-9,-100 C-15,-122 -16,-152 -10,-178"/>
+      <path class="sv" d="M9,-100 C15,-122 16,-152 10,-178"/>
+      <path class="sv" d="M-18,-68 C-24,-80 -26,-100 -20,-120"/>
+      <path class="sv" d="M18,-68 C24,-80 26,-100 20,-120"/>
+    </g>
+    <!-- Sepal 1 — 72° -->
+    <g class="sepal" data-angle="72">
+      <path class="sepal-body" d="M0,0 C-22,-12 -36,-72 -28,-138 C-20,-188 -8,-218 0,-228 C8,-218 20,-188 28,-138 C36,-72 22,-12 0,0 Z"/>
+      <path class="sv" d="M0,-4 L0,-224"/>
+      <path class="sv" d="M-3,-42 C-10,-72 -14,-108 -8,-158"/>
+      <path class="sv" d="M3,-42 C10,-72 14,-108 8,-158"/>
+      <path class="sv" d="M-9,-100 C-15,-122 -16,-152 -10,-178"/>
+      <path class="sv" d="M9,-100 C15,-122 16,-152 10,-178"/>
+    </g>
+    <!-- Sepal 2 — 144° -->
+    <g class="sepal" data-angle="144">
+      <path class="sepal-body" d="M0,0 C-22,-12 -36,-72 -28,-138 C-20,-188 -8,-218 0,-228 C8,-218 20,-188 28,-138 C36,-72 22,-12 0,0 Z"/>
+      <path class="sv" d="M0,-4 L0,-224"/>
+      <path class="sv" d="M-3,-42 C-10,-72 -14,-108 -8,-158"/>
+      <path class="sv" d="M3,-42 C10,-72 14,-108 8,-158"/>
+      <path class="sv" d="M-9,-100 C-15,-122 -16,-152 -10,-178"/>
+      <path class="sv" d="M9,-100 C15,-122 16,-152 10,-178"/>
+    </g>
+    <!-- Sepal 3 — 216° (goes via -144°) -->
+    <g class="sepal" data-angle="216">
+      <path class="sepal-body" d="M0,0 C-22,-12 -36,-72 -28,-138 C-20,-188 -8,-218 0,-228 C8,-218 20,-188 28,-138 C36,-72 22,-12 0,0 Z"/>
+      <path class="sv" d="M0,-4 L0,-224"/>
+      <path class="sv" d="M-3,-42 C-10,-72 -14,-108 -8,-158"/>
+      <path class="sv" d="M3,-42 C10,-72 14,-108 8,-158"/>
+      <path class="sv" d="M-9,-100 C-15,-122 -16,-152 -10,-178"/>
+      <path class="sv" d="M9,-100 C15,-122 16,-152 10,-178"/>
+    </g>
+    <!-- Sepal 4 — 288° (goes via -72°) -->
+    <g class="sepal" data-angle="288">
+      <path class="sepal-body" d="M0,0 C-22,-12 -36,-72 -28,-138 C-20,-188 -8,-218 0,-228 C8,-218 20,-188 28,-138 C36,-72 22,-12 0,0 Z"/>
+      <path class="sv" d="M0,-4 L0,-224"/>
+      <path class="sv" d="M-3,-42 C-10,-72 -14,-108 -8,-158"/>
+      <path class="sv" d="M3,-42 C10,-72 14,-108 8,-158"/>
+      <path class="sv" d="M-9,-100 C-15,-122 -16,-152 -10,-178"/>
+      <path class="sv" d="M9,-100 C15,-122 16,-152 10,-178"/>
+    </g>
+    <!-- Centre ring -->
+    <circle cx="0" cy="0" r="38" fill="#3A1B2E" class="bloom-center-ring"/>
+    <!-- Berry -->
+    <circle class="bloom-berry" cx="0" cy="0" r="30" fill="url(#berry-grad)"/>
+    <ellipse cx="-10" cy="-10" rx="9" ry="9" fill="rgba(255,255,255,0.20)" class="bloom-berry"/>
+    <circle cx="0" cy="0" r="30" fill="none" stroke="#F5C842" stroke-width="0.9" opacity="0.5" class="bloom-berry"/>
+  </svg>
   <div class="curtain-mark">
-    <svg width="86" height="96" viewBox="0 0 40 44" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <g transform="translate(20,40) scale(0.26)" fill="none" stroke="#F5C842" stroke-width="3">
-        <path d="M0,0 C-52,-18,-75,-60,-50,-100 C-28,-122,0,-132,0,-132" vector-effect="non-scaling-stroke"/>
-        <path d="M0,0 C52,-18,75,-60,50,-100 C28,-122,0,-132,0,-132" vector-effect="non-scaling-stroke"/>
-        <path d="M0,0 C1,-32,0,-82,0,-132" stroke-width="2" vector-effect="non-scaling-stroke"/>
-        <path d="M-42,-30 C-15,-38,15,-38,42,-30" stroke-width="2.2" vector-effect="non-scaling-stroke"/>
-        <path d="M-60,-56 C-24,-64,24,-64,60,-56" stroke-width="2" vector-effect="non-scaling-stroke"/>
-        <ellipse cx="0" cy="-66" rx="22" ry="24" fill="#E8571A" stroke="none"/>
-      </g>
-    </svg>
     <span class="curtain-word">Cie Rouletabille</span>
   </div>
 </div>
