@@ -227,50 +227,7 @@ const initFX = () => {
   requestAnimationFrame(() => requestAnimationFrame(initLengths));
 };
 
-/* ---- initCursor : curseur custom physalis (desktop uniquement) ---- */
-const initCursor = () => {
-  const el = document.getElementById("custom-cursor");
-  if (!el) return;
-  // Désactivé si touch ou reduced-motion
-  if (prefersReduced() || window.matchMedia("(hover: none)").matches) {
-    el.style.display = "none";
-    return;
-  }
-
-  let cx = -200, cy = -200;   // position cible
-  let rx = -200, ry = -200;   // position rendue (lerp)
-  let raf = null;
-  let hovering = false;
-
-  const lerp = (a, b, t) => a + (b - a) * t;
-
-  const tick = () => {
-    raf = null;
-    rx = lerp(rx, cx, 0.14);
-    ry = lerp(ry, cy, 0.14);
-    el.style.transform = `translate(calc(${rx.toFixed(1)}px - 50%), calc(${ry.toFixed(1)}px - 50%))${hovering ? " scale(1.35)" : ""}`;
-    // Continue tant qu'on n'est pas arrivé
-    if (Math.abs(rx - cx) > 0.3 || Math.abs(ry - cy) > 0.3) {
-      raf = requestAnimationFrame(tick);
-    }
-  };
-
-  document.addEventListener("mousemove", (e) => {
-    cx = e.clientX;
-    cy = e.clientY;
-    el.classList.add("cursor-visible");
-    if (!raf) raf = requestAnimationFrame(tick);
-  }, { passive: true });
-
-  document.addEventListener("mouseleave", () => el.classList.remove("cursor-visible"));
-
-  // Grossit sur les éléments interactifs
-  const HOVER_SEL = "a, button, [role='button'], .card-fx, .agenda-row, .nav-link, .nav-cta";
-  document.addEventListener("mouseover", (e) => {
-    hovering = !!e.target.closest(HOVER_SEL);
-    el.classList.toggle("cursor-hover", hovering);
-  }, { passive: true });
-};
+const initCursor = () => {}; // curseur désactivé
 
 window.prefersReduced = prefersReduced;
 window.initCursor = initCursor;
