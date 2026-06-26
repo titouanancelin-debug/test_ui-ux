@@ -145,36 +145,57 @@ const initFX = () => {
   }
   document.body.classList.add("curtain-active");
 
-  // --- Animation JS de la floraison (rAF, plus fiable que CSS transform sur SVG) ---
-  const sepals = curtain.querySelectorAll('.sepal');
-  // ease-out-back : légère surtension en fin d'ouverture (effet ressort)
-  const easeOutBack = t => { const c = 1.70158 + 1; return 1 + c * Math.pow(t - 1, 3) + 1.70158 * Math.pow(t - 1, 2); };
-  const delays = [450, 500, 550, 550, 500];
-  const dur = 1250;
-  // angles finaux (positif = sens horaire, 3 = on fait -144 pour le chemin court)
-  const finalAngles = [0, 72, 144, -144, -72];
+  // --- Volée de physalis : on injecte plusieurs <use> et on les anime au rAF ---
+  const SVGNS = "http://www.w3.org/2000/svg";
+  const XLINK = "http://www.w3.org/1999/xlink";
+  const field = curtain.querySelector("#physalis-field");
+  const easeOutBack = t => { const c = 2.2; return 1 + (c + 1) * Math.pow(t - 1, 3) + c * Math.pow(t - 1, 2); };
 
-  sepals.forEach((el, i) => {
-    const target = finalAngles[i];
-    const delay = delays[i];
-    const t0 = performance.now() + delay;
+  // Disposition : positions (en coord viewBox 1440×900), échelle, rotation de base, délai.
+  // Une grande au centre, plusieurs autres réparties — comme une grappe séchée.
+  const layout = [
+    { x: 720, y: 430, s: 1.7,  rot: -4,  delay: 120, sway: 3 },
+    { x: 470, y: 300, s: 1.05, rot: 14,  delay: 320, sway: 5 },
+    { x: 990, y: 320, s: 1.2,  rot: -16, delay: 260, sway: 4 },
+    { x: 360, y: 560, s: 0.78, rot: 22,  delay: 520, sway: 6 },
+    { x: 1080, y: 580, s: 0.9, rot: -22, delay: 460, sway: 5 },
+    { x: 600, y: 660, s: 0.62, rot: 8,   delay: 640, sway: 7 },
+    { x: 860, y: 650, s: 0.7,  rot: -10, delay: 700, sway: 6 },
+    { x: 250, y: 410, s: 0.5,  rot: 30,  delay: 820, sway: 8 },
+    { x: 1210, y: 430, s: 0.55, rot: -28, delay: 780, sway: 7 },
+  ];
+  const growDur = 1100;
+
+  layout.forEach((cfg) => {
+    const use = document.createElementNS(SVGNS, "use");
+    use.setAttributeNS(XLINK, "href", "#physalis");
+    use.setAttribute("href", "#physalis");
+    use.setAttribute("class", "physalis");
+    field.appendChild(use);
+
+    const t0 = performance.now() + cfg.delay;
+    let fadedIn = false;
     const tick = (now) => {
       const elapsed = now - t0;
       if (elapsed < 0) { requestAnimationFrame(tick); return; }
-      const p = Math.min(elapsed / dur, 1);
-      const angle = target * easeOutBack(p);
-      el.setAttribute('transform', `rotate(${angle.toFixed(2)}, 0, 0)`);
-      if (p < 1) requestAnimationFrame(tick);
+      if (!fadedIn) { use.classList.add("ph-in"); fadedIn = true; }
+      const p = Math.min(elapsed / growDur, 1);
+      const grow = easeOutBack(p);                    // 0 → 1 avec léger rebond
+      const scale = cfg.s * grow;
+      // oscillation douce, perpétuelle, façon brise
+      const t = elapsed / 1000;
+      const angle = cfg.rot + Math.sin(t * 1.1 + cfg.x) * cfg.sway;
+      const drift = Math.sin(t * 0.8 + cfg.y) * 4 * grow;
+      use.setAttribute(
+        "transform",
+        `translate(${(cfg.x + drift).toFixed(1)}, ${cfg.y}) rotate(${angle.toFixed(2)}) scale(${scale.toFixed(3)})`
+      );
+      requestAnimationFrame(tick);                    // continue d'osciller jusqu'au retrait
     };
     requestAnimationFrame(tick);
   });
 
-  // Nervures : on retire la classe .sv-hidden après 1200ms pour déclencher l'animation CSS
-  window.setTimeout(() => {
-    curtain.querySelectorAll('.sv').forEach(el => el.classList.add('sv-draw'));
-  }, 1150);
-
-  // Exit : fade-out après que la fleur est épanouie (~2.4s) et retrait du DOM
+  // Exit : fondu après que toutes les physalis sont écloses, puis retrait du DOM
   window.setTimeout(() => {
     curtain.classList.add("curtain-exit");
     document.body.classList.remove("curtain-active");
