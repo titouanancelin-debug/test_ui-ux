@@ -38,39 +38,128 @@ const Nav = ({ route, setRoute }) => {
   );
 };
 
+/* ======================= PARALLAX HERO ======================= */
+/*
+ * PHOTOS PLACEHOLDER — remplacer ces 4 URLs la semaine prochaine :
+ *   HERO_MAIN  : photo principale (plein écran, format paysage)
+ *   HERO_F0    : photo flottante gauche haute (portrait)
+ *   HERO_F1    : photo flottante droite (portrait)
+ *   HERO_F2    : photo flottante gauche basse (portrait)
+ */
+const HERO_MAIN = "https://images.unsplash.com/photo-1516307365426-bea591f05011?w=1800&q=80";
+const HERO_F0   = "https://images.unsplash.com/photo-1503095396549-807759245b35?w=700&q=80";
+const HERO_F1   = "https://images.unsplash.com/photo-1460723237483-7a6dc9d0b212?w=700&q=80";
+const HERO_F2   = "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=700&q=80";
+
+const SCROLL_H = 1400;
+
+const ParallaxHero = ({ setRoute }) => {
+  const centerRef = useRef(null);
+  const float0    = useRef(null);
+  const float1    = useRef(null);
+  const float2    = useRef(null);
+
+  useEffect(() => {
+    if (prefersReduced()) return;
+    let raf = null;
+    const update = () => {
+      raf = null;
+      const p = Math.min(Math.max(window.scrollY / SCROLL_H, 0), 1);
+      const c = 28 * (1 - p);
+      const e = 100 - c;
+      if (centerRef.current) {
+        centerRef.current.style.clipPath = `polygon(${c}% ${c}%, ${e}% ${c}%, ${e}% ${e}%, ${c}% ${e}%)`;
+        centerRef.current.style.backgroundSize = `${170 - 70 * p}%`;
+      }
+      const shifts = [-180, 230, -120];
+      [float0, float1, float2].forEach((r, i) => {
+        if (r.current) r.current.style.transform = `translateY(${p * shifts[i]}px)`;
+      });
+    };
+    const onScroll = () => { if (!raf) raf = requestAnimationFrame(update); };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => { window.removeEventListener("scroll", onScroll); if (raf) cancelAnimationFrame(raf); };
+  }, []);
+
+  const floatStyle = (top, side, w, extra = {}) => ({
+    position:"absolute", [side[0]]:side[1], top, width:w, zIndex:3,
+    willChange:"transform", overflow:"hidden", borderRadius:3,
+    boxShadow:"0 16px 48px rgba(0,0,0,0.55)", ...extra,
+  });
+
+  return (
+    <div style={{ height:`calc(${SCROLL_H}px + 100vh)`, position:"relative" }}>
+      <div style={{ position:"sticky", top:0, height:"100vh", overflow:"hidden", background:"#1A0E08" }}>
+
+        {/* Image centrale qui s'ouvre au scroll */}
+        <div ref={centerRef} style={{
+          position:"absolute", inset:0,
+          backgroundImage:`url(${HERO_MAIN})`,
+          backgroundSize:"170%", backgroundPosition:"center",
+          backgroundRepeat:"no-repeat",
+          clipPath:"polygon(28% 28%, 72% 28%, 72% 72%, 28% 72%)",
+          willChange:"clip-path, background-size",
+        }}/>
+
+        {/* Image flottante gauche haute */}
+        <div ref={float0} style={floatStyle("10%", ["left","4%"], "20%")}>
+          <div style={{ paddingTop:"135%", background:`url(${HERO_F0}) center/cover` }}/>
+        </div>
+
+        {/* Image flottante droite */}
+        <div ref={float1} style={floatStyle("28%", ["right","3%"], "17%")}>
+          <div style={{ paddingTop:"125%", background:`url(${HERO_F1}) center/cover` }}/>
+        </div>
+
+        {/* Image flottante gauche basse */}
+        <div ref={float2} style={{ ...floatStyle("auto", ["left","7%"], "15%"), bottom:"18%" }}>
+          <div style={{ paddingTop:"115%", background:`url(${HERO_F2}) center/cover` }}/>
+        </div>
+
+        {/* Dégradé gauche pour lisibilité texte */}
+        <div style={{ position:"absolute", inset:0, zIndex:2,
+          background:"linear-gradient(to right, rgba(26,14,8,0.88) 0%, rgba(26,14,8,0.55) 40%, rgba(26,14,8,0.08) 65%, transparent 100%)" }}/>
+
+        {/* Dégradé bas */}
+        <div style={{ position:"absolute", bottom:0, left:0, right:0, height:180, zIndex:4,
+          background:"linear-gradient(to bottom, transparent, #1A0E08)" }}/>
+
+        {/* Texte hero */}
+        <div style={{ position:"relative", zIndex:5, padding:"0 var(--pad-x)", maxWidth:640,
+          height:"100%", display:"flex", flexDirection:"column", justifyContent:"center" }}>
+          <Reveal variant="fade" delay={50} className="eyebrow" style={{ color:"var(--amber)", marginBottom:24 }}>
+            Saison 2025 — 2026 · Toulon & tournée
+          </Reveal>
+          <h1 className="display" style={{ fontSize:"clamp(56px, 8vw, 118px)", marginBottom:28, color:"var(--paper)" }}>
+            <KineticTitle lineDelay={110} baseDelay={150} lines={[
+              <>Théâtre <span className="display-italic">vivant</span>,</>,
+              <>corps & <span className="display-italic">voix</span>.</>,
+            ]}/>
+          </h1>
+          <Reveal variant="up" delay={500} as="p" style={{ fontSize:18, lineHeight:1.6, color:"color-mix(in oklab, var(--paper) 82%, transparent)", textWrap:"pretty", maxWidth:460, marginBottom:32 }}>
+            Compagnie de création installée à Toulon depuis 2014. Des spectacles qui traversent les frontières du réel et du fantastique, ouverts à tous.
+          </Reveal>
+          <Reveal variant="up" delay={620} style={{ display:"flex", gap:12, flexWrap:"wrap" }}>
+            <button className="btn btn-amber" onClick={() => setRoute("spectacles")}>Découvrir les spectacles →</button>
+            <button className="btn btn-ghost" onClick={() => setRoute("agenda")} style={{ color:"var(--paper)", borderColor:"color-mix(in oklab, var(--paper) 40%, transparent)" }}>Voir l'agenda</button>
+          </Reveal>
+        </div>
+
+        <div className="scroll-cue">
+          <span>Défiler</span>
+          <span className="cue-rail"><span className="cue-dot"/></span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 /* ======================= HOME ======================= */
 const Home = ({ setRoute, setSpectacle }) => {
-  const heroMotif = useParallax(-0.18, 90);
   return (
   <>
-    {/* HERO — bandeau terracotta + lanternes physalis, façon original */}
-    <section className="hero" style={{ position:"relative", overflow:"hidden", background:"var(--terra)", color:"var(--paper)", minHeight:"min(88vh, 820px)", display:"flex", alignItems:"center" }}>
-      <div ref={heroMotif} style={{ position:"absolute", right:0, top:0, height:"100%", width:"62%", opacity:0.95, willChange:"transform" }}>
-        <MotifHero color="var(--amber)" berryColor="#E8571A" style={{ width:"100%", height:"100%" }}/>
-      </div>
-      <div className="hero-halo"/>
-      <div className="hero-vignette"/>
-      <div style={{ position:"relative", zIndex:2, padding:"72px var(--pad-x)", maxWidth:680 }}>
-        <Reveal variant="fade" delay={50} className="eyebrow" style={{ color:"var(--amber)", marginBottom:24 }}>Saison 2025 — 2026 · Toulon & tournée</Reveal>
-        <h1 className="display" style={{ fontSize:"clamp(60px, 9vw, 128px)", marginBottom:28, color:"var(--paper)" }}>
-          <KineticTitle lineDelay={110} baseDelay={150} lines={[
-            <>Théâtre <span className="display-italic">vivant</span>,</>,
-            <>corps & <span className="display-italic">voix</span>.</>,
-          ]}/>
-        </h1>
-        <Reveal variant="up" delay={500} as="p" style={{ fontSize:19, lineHeight:1.55, color:"color-mix(in oklab, var(--paper) 88%, transparent)", textWrap:"pretty", maxWidth:480, marginBottom:32 }}>
-          Compagnie de création installée à Toulon depuis 2014. Des spectacles qui traversent les frontières du réel et du fantastique, ouverts à tous.
-        </Reveal>
-        <Reveal variant="up" delay={620} style={{ display:"flex", gap:12, flexWrap:"wrap" }}>
-          <button className="btn btn-amber" onClick={() => setRoute("spectacles")}>Découvrir les spectacles →</button>
-          <button className="btn btn-ghost" onClick={() => setRoute("agenda")} style={{ color:"var(--paper)", borderColor:"color-mix(in oklab, var(--paper) 40%, transparent)" }}>Voir l'agenda</button>
-        </Reveal>
-      </div>
-      <div className="scroll-cue">
-        <span>Défiler</span>
-        <span className="cue-rail"><span className="cue-dot"/></span>
-      </div>
-    </section>
+    <ParallaxHero setRoute={setRoute}/>
 
     {/* MARQUEE */}
     <div className="marquee">
