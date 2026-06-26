@@ -1,0 +1,16 @@
+# Ruflo runtime state (local, not source)
+.swarm/
+ruvector.db
+ruvector.db-shm
+ruvector.db-wal
+*.db
+*.db-shm
+*.db-wal
+
+# Ruflo runtime data/logs
+.claude-flow/data/
+.claude-flow/logs/
+.claude-flow/sessions/
+.claude-flow/neural/
+*.log
+*.tmp
