@@ -38,13 +38,15 @@ scalping/
 ├── indicators.py      # EMA, RSI(Wilder), MACD, ATR, ADX, Bollinger, VWAP
 ├── candlesticks.py    # ~30 patterns de chandeliers (vectorisés)
 ├── chart_patterns.py  # double/triple top-bottom, H&S, triangles, wedges, flags
-├── levels.py          # support/résistance + détection de cassure
+├── levels.py          # support/résistance + cassure + RETEST
 ├── risk.py            # position sizing, SL/TP, plafond de notionnel
-├── strategy.py        # moteur de signaux (combine tout + score de confiance)
+├── strategy.py        # moteur de signaux (cassure/retest + ADX + multi-timeframe)
 ├── backtest.py        # backtester réaliste + métriques
+├── pattern_stats.py   # espérance réelle de chaque pattern sur tes données
 └── broker_alpaca.py   # exécution Alpaca Paper (ordres bracket OCO)
 run_backtest.py        # CLI backtest
 run_live.py            # CLI live (alertes paper, ou exécution Alpaca)
+analyze_patterns.py    # CLI : classe les patterns par espérance
 ```
 
 Tout fonctionne à partir d'un **DataFrame OHLCV standard** (`time, open, high, low, close, volume`) → agnostique à la source de données.
@@ -85,6 +87,23 @@ python run_live.py --interval 5m --once
 python run_live.py --interval 5m --execute
 ```
 
+### Espérance de chaque pattern (sur TES données)
+
+```bash
+python analyze_patterns.py --symbol BTCUSDT --interval 5m --history 5000
+python analyze_patterns.py --csv data/btc_5m.csv --save stats.csv
+```
+
+Sortie : un tableau trié par espérance (en R). On garde les patterns à
+espérance positive avec assez d'occurrences, on désactive les autres.
+
+### Tests
+
+```bash
+pip install pytest
+pytest -q
+```
+
 ---
 
 ## 5. La stratégie
@@ -99,6 +118,14 @@ Viennent ensuite, en **confirmation/contexte** :
 - **tendance** (EMA 20/50) et **MACD** ;
 - **patterns de chandeliers** et **figures chartistes** ;
 - **garde-fou RSI** (on ne sur-achète pas en zone de surachat).
+
+Trois leviers (dans `config.py`) pour rendre les cassures plus sereines :
+
+| Paramètre | Effet |
+|---|---|
+| `require_retest=True` | N'entre qu'au **retest** du niveau cassé (le niveau doit tenir) — filtre fort contre les faux breakouts |
+| `use_adx_filter=True` + `breakout_min_adx` | **Filtre de régime** : ignore les cassures quand la tendance est trop faible (marché plat) |
+| `use_mtf=True` + `htf_multiplier` | **Multi-timeframe** : interdit les trades à contre-tendance d'un TF supérieur (ex: 5m × 3 = 15m) |
 
 Chaque signal porte un **score de confiance (0..1)** et la **liste des raisons** (transparence en alerte et au debug). Le `stop` se place au-delà du niveau cassé (ou via l'ATR), le `take-profit` suit le ratio R/R borné par le prochain niveau S/R.
 

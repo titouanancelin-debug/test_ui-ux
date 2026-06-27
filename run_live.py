@@ -82,11 +82,20 @@ def main():
     p.add_argument("--once", action="store_true", help="Une seule analyse puis sortie")
     p.add_argument("--execute", action="store_true", help="Envoyer des ordres sur Alpaca Paper")
     p.add_argument("--min-confidence", type=float, help="Confiance minimale 0..1")
+    p.add_argument("--retest", action="store_true", help="Entrer au retest du niveau cassé")
+    p.add_argument("--mtf", action="store_true", help="Exiger l'alignement multi-timeframe")
+    p.add_argument("--no-adx", action="store_true", help="Désactiver le filtre ADX")
     args = p.parse_args()
 
     cfg = StrategyConfig()
     if args.min_confidence is not None:
         cfg.min_confidence = args.min_confidence
+    if args.retest:
+        cfg.require_retest = True
+    if args.mtf:
+        cfg.use_mtf = True
+    if args.no_adx:
+        cfg.use_adx_filter = False
 
     broker = None
     if args.execute:

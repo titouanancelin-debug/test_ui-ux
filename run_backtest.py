@@ -36,6 +36,14 @@ def parse_args():
     p.add_argument("--risk", type=float, help="Risque par trade (%)")
     p.add_argument("--rr", type=float, help="Ratio Risk/Reward")
     p.add_argument("--min-confidence", type=float, help="Confiance minimale 0..1")
+
+    # Leviers stratégie
+    p.add_argument("--retest", action="store_true", help="Entrer au retest du niveau cassé")
+    p.add_argument("--mtf", action="store_true", help="Exiger l'alignement multi-timeframe")
+    p.add_argument("--htf-mult", type=int, help="Multiplicateur du TF supérieur (défaut 3)")
+    p.add_argument("--no-adx", action="store_true", help="Désactiver le filtre ADX")
+    p.add_argument("--adx-min", type=float, help="Seuil ADX minimal pour les cassures")
+
     p.add_argument("--plot", action="store_true", help="Affiche la courbe d'équité (matplotlib)")
     return p.parse_args()
 
@@ -52,6 +60,16 @@ def main():
         cfg.rr_ratio = args.rr
     if args.min_confidence is not None:
         cfg.min_confidence = args.min_confidence
+    if args.retest:
+        cfg.require_retest = True
+    if args.mtf:
+        cfg.use_mtf = True
+    if args.htf_mult is not None:
+        cfg.htf_multiplier = args.htf_mult
+    if args.no_adx:
+        cfg.use_adx_filter = False
+    if args.adx_min is not None:
+        cfg.breakout_min_adx = args.adx_min
 
     if args.csv:
         print(f"📂 Chargement CSV : {args.csv}")

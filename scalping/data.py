@@ -14,6 +14,8 @@ Trois sources :
 """
 from __future__ import annotations
 
+import time
+
 import pandas as pd
 import numpy as np
 import requests
@@ -68,6 +70,65 @@ def get_candles_binance(symbol: str, interval: str, limit: int = 500) -> pd.Data
     except Exception as e:  # réseau, JSON, etc.
         print(f"⚠️  Erreur Binance [{symbol} {interval}] : {e}")
         return pd.DataFrame(columns=OHLCV_COLUMNS)
+
+
+def get_history_binance(symbol: str, interval: str, total: int = 5000) -> pd.DataFrame:
+    """Récupère un long historique en paginant (Binance limite à 1000/req).
+
+    Remonte le temps depuis maintenant jusqu'à obtenir ~`total` bougies.
+    Idéal pour constituer un jeu de données de backtest sérieux.
+    """
+    if interval not in VALID_INTERVALS:
+        raise ValueError(f"Intervalle invalide : {interval!r}")
+
+    frames: list[pd.DataFrame] = []
+    remaining = total
+    end_time: int | None = None
+
+    while remaining > 0:
+        limit = min(1000, remaining)
+        params = {"symbol": symbol, "interval": interval, "limit": limit}
+        if end_time is not None:
+            params["endTime"] = end_time
+        try:
+            r = requests.get(BINANCE_URL, params=params, timeout=10)
+        except Exception as e:
+            print(f"⚠️  Erreur réseau Binance : {e}")
+            break
+        if r.status_code != 200:
+            print(f"⚠️  Binance HTTP {r.status_code} (arrêt pagination)")
+            break
+        data = r.json()
+        if not data:
+            break
+
+        chunk = pd.DataFrame(
+            data,
+            columns=[
+                "time", "open", "high", "low", "close", "volume",
+                "close_time", "quote_volume", "trades",
+                "taker_buy_base", "taker_buy_quote", "ignore",
+            ],
+        )
+        frames.append(chunk)
+        end_time = int(data[0][0]) - 1   # juste avant la plus ancienne reçue
+        remaining -= len(data)
+        if len(data) < limit:
+            break
+        time.sleep(0.2)                  # politesse envers l'API
+
+    if not frames:
+        return pd.DataFrame(columns=OHLCV_COLUMNS)
+
+    full = pd.concat(frames, ignore_index=True)
+    full["time"] = pd.to_datetime(full["time"], unit="ms", utc=True)
+    full = full.drop_duplicates(subset="time").sort_values("time").reset_index(drop=True)
+    return _coerce_ohlcv(full)
+
+
+def save_csv(df: pd.DataFrame, path: str) -> None:
+    """Sauvegarde un DataFrame OHLCV en CSV (réutilisable par load_csv)."""
+    df.to_csv(path, index=False)
 
 
 def load_csv(path: str) -> pd.DataFrame:

@@ -66,6 +66,15 @@ class StrategyConfig:
     breakout_buffer_atr: float = 0.10   # marge au-delà du niveau (en ATR)
     breakout_volume_mult: float = 1.3   # volume mini = 1.3x la moyenne
     require_retest: bool = False        # exiger un retest du niveau cassé
+    retest_lookback: int = 12           # fenêtre (bougies) pour retrouver la cassure à retester
+
+    # --- Filtre de régime (force de tendance) ---
+    use_adx_filter: bool = True         # ne valider les cassures que si tendance assez forte
+    breakout_min_adx: float = 20.0      # seuil ADX minimal pour une cassure
+
+    # --- Multi-timeframe ---
+    use_mtf: bool = False               # exiger l'alignement avec un TF supérieur
+    htf_multiplier: int = 3             # TF sup = htf_multiplier × TF d'entrée (5m×3 = 15m)
 
     # Score minimal (0..1) pour émettre un signal.
     min_confidence: float = 0.5

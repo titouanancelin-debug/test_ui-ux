@@ -21,11 +21,20 @@ from dataclasses import dataclass, field
 
 import pandas as pd
 
+import numpy as np
+
 from .config import StrategyConfig
-from .indicators import add_indicators, atr as atr_fn
+from .indicators import add_indicators, atr as atr_fn, ema
 from . import candlesticks as cs
 from . import chart_patterns as cp
-from .levels import detect_levels, detect_breakout, nearest_levels, find_pivots, Level
+from .levels import (
+    detect_levels,
+    detect_breakout,
+    detect_retest,
+    nearest_levels,
+    find_pivots,
+    Level,
+)
 
 
 @dataclass
@@ -47,9 +56,37 @@ class Prepared:
     pivots: tuple[list, list]
 
 
+def mtf_trend_series(df: pd.DataFrame, multiplier: int, cfg: StrategyConfig) -> pd.Series:
+    """Tendance d'un timeframe SUPÉRIEUR, ramenée sur chaque bougie d'entrée.
+
+    On regroupe les bougies par paquets de `multiplier` (ex: 3 bougies 5m =
+    1 bougie 15m), on calcule la tendance EMA de ce TF supérieur, puis on
+    l'attribue à chaque bougie d'entrée. Anti-lookahead : une bougie
+    d'entrée n'utilise que la dernière bougie supérieure DÉJÀ CLÔTURÉE
+    (le paquet précédent, pas celui en cours de formation).
+    """
+    n = len(df)
+    multiplier = max(2, int(multiplier))
+    group = np.arange(n) // multiplier
+    g = df.groupby(group).agg(close=("close", "last"))
+    ema_f = ema(g["close"], cfg.ema_fast)
+    ema_s = ema(g["close"], cfg.ema_slow)
+    gt = np.zeros(len(g), dtype=int)
+    gt[(g["close"] > ema_f) & (ema_f > ema_s)] = 1
+    gt[(g["close"] < ema_f) & (ema_f < ema_s)] = -1
+
+    completed = group - 1                 # dernier paquet entièrement clôturé
+    out = np.zeros(n, dtype=int)
+    mask = completed >= 0
+    out[mask] = gt[completed[mask]]
+    return pd.Series(out, index=df.index)
+
+
 def prepare(df: pd.DataFrame, cfg: StrategyConfig | None = None) -> Prepared:
     cfg = cfg or StrategyConfig()
     df_ind = add_indicators(df, cfg)
+    if cfg.use_mtf:
+        df_ind["htf_trend"] = mtf_trend_series(df_ind, cfg.htf_multiplier, cfg)
     flags = cs.detect_all(df_ind)
     pivots = find_pivots(df_ind, cfg.pivot_window)
     return Prepared(df_ind, flags, pivots)
@@ -84,20 +121,38 @@ def generate_signal(
     trend = _trend(row)
     rsi_v = float(row["rsi"])
     macd_hist = float(row["macd_hist"])
+    adx_v = float(row["adx"])
+    htf = int(row["htf_trend"]) if (cfg.use_mtf and "htf_trend" in df.columns) else 0
 
     bull, bear, reasons = 0.0, 0.0, []
 
-    # --- 1. Cassure S/R (signal principal) ---
-    bo = detect_breakout(df, i, levels, cfg.breakout_buffer_atr, cfg.breakout_volume_mult)
+    # --- 1. Cassure / retest S/R (signal principal) ---
+    if cfg.require_retest:
+        bo = detect_retest(
+            df, i, levels, cfg.retest_lookback,
+            cfg.breakout_buffer_atr, cfg.breakout_volume_mult,
+        )
+        kind, base_w = "Retest", 0.50
+    else:
+        bo = detect_breakout(
+            df, i, levels, cfg.breakout_buffer_atr, cfg.breakout_volume_mult
+        )
+        kind, base_w = "Cassure", 0.45
+
+    # Filtre de régime : une cassure n'est fiable qu'avec une tendance assez forte.
+    if bo is not None and cfg.use_adx_filter and adx_v < cfg.breakout_min_adx:
+        reasons.append(f"ADX {adx_v:.0f} < {cfg.breakout_min_adx:.0f} -> cassure ignorée")
+        bo = None
+
     if bo is not None:
-        w = 0.45 + (0.10 if bo.volume_ok else 0.0)
+        w = base_w + (0.10 if bo.volume_ok else 0.0)
         vol_txt = "volume OK" if bo.volume_ok else "volume faible"
+        side_txt = "résistance" if bo.direction == "BUY" else "support"
         if bo.direction == "BUY":
             bull += w
-            reasons.append(f"Cassure résistance {bo.level:.4f} ({vol_txt})")
         else:
             bear += w
-            reasons.append(f"Cassure support {bo.level:.4f} ({vol_txt})")
+        reasons.append(f"{kind} {side_txt} {bo.level:.4f} ({vol_txt})")
 
     # --- 2. Tendance (contexte) ---
     if trend == "BULLISH":
@@ -142,11 +197,25 @@ def generate_signal(
         bear *= 0.4
         reasons.append(f"RSI survente {rsi_v:.0f} (freine les ventes)")
 
+    # --- 7. Alignement multi-timeframe (si activé) ---
+    if cfg.use_mtf and htf != 0:
+        if htf > 0:
+            bull += 0.10
+        else:
+            bear += 0.10
+
     # --- Décision ---
     net = bull - bear
     if abs(net) < 1e-9:
         return None
     direction = "BUY" if net > 0 else "SELL"
+
+    # Veto multi-timeframe : on ne prend pas de trade à contre-tendance du TF supérieur.
+    if cfg.use_mtf and htf != 0:
+        if (direction == "BUY" and htf < 0) or (direction == "SELL" and htf > 0):
+            return None
+        reasons.append("Aligné avec le TF supérieur")
+
     confidence = min(1.0, abs(net))
     if confidence < cfg.min_confidence:
         return None

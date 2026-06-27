@@ -135,3 +135,62 @@ def detect_breakout(
             return Breakout("SELL", lv.price, volume_ok, i)
 
     return None
+
+
+def detect_retest(
+    df: pd.DataFrame,
+    i: int,
+    levels: list[Level],
+    lookback: int = 12,
+    buffer_atr: float = 0.10,
+    volume_mult: float = 1.3,
+    tol_atr: float = 0.4,
+) -> Breakout | None:
+    """Détecte une entrée sur RETEST d'un niveau récemment cassé.
+
+    Entrée plus prudente que la cassure brute : on attend que le prix
+    revienne tester le niveau cassé et qu'il TIENNE (le niveau cassé fait
+    désormais office de support/résistance), ce qui filtre beaucoup de
+    faux breakouts.
+
+      - BUY  : une résistance a été cassée à la hausse récemment, le prix
+               revient la toucher (mèche basse) mais CLÔTURE au-dessus.
+      - SELL : un support a été cassé à la baisse récemment, le prix
+               revient le toucher (mèche haute) mais CLÔTURE en dessous.
+    """
+    if i < lookback + 1 or i >= len(df):
+        return None
+
+    close = df["close"].iloc[i]
+    low = df["low"].iloc[i]
+    high = df["high"].iloc[i]
+    open_ = df["open"].iloc[i]
+
+    a = atr_fn(df).iloc[i]
+    if not np.isfinite(a) or a <= 0:
+        a = close * 0.005
+    buf = buffer_atr * a
+    tol = tol_atr * a
+
+    vma = volume_ma(df).iloc[i]
+    volume_ok = bool(np.isfinite(vma) and df["volume"].iloc[i] >= volume_mult * vma)
+
+    window_close = df["close"].iloc[i - lookback : i]
+
+    # Retest haussier d'une résistance cassée.
+    for lv in [l for l in levels if l.kind == "resistance"]:
+        broke_recently = bool((window_close > lv.price + buf).any())
+        retest_touch = low <= lv.price + tol
+        holds = close > lv.price and close > open_     # bougie de rejet haussière
+        if broke_recently and retest_touch and holds:
+            return Breakout("BUY", lv.price, volume_ok, i)
+
+    # Retest baissier d'un support cassé.
+    for lv in [l for l in levels if l.kind == "support"]:
+        broke_recently = bool((window_close < lv.price - buf).any())
+        retest_touch = high >= lv.price - tol
+        holds = close < lv.price and close < open_     # bougie de rejet baissière
+        if broke_recently and retest_touch and holds:
+            return Breakout("SELL", lv.price, volume_ok, i)
+
+    return None
