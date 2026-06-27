@@ -1,0 +1,21 @@
+# Secrets — NE JAMAIS committer
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+*.egg-info/
+
+# Données et sorties locales
+data/*.csv
+*.log
+*.png
+backtest_results/
+
+# OS / éditeurs
+.DS_Store
+.idea/
+.vscode/
