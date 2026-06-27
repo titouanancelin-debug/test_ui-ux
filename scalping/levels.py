@@ -52,13 +52,21 @@ def detect_levels(
     lookback: int = 150,
     window: int = 3,
     cluster_atr: float = 0.5,
+    atr_value: float | None = None,
 ) -> list[Level]:
-    """Détecte et regroupe les niveaux S/R sur les `lookback` dernières bougies."""
+    """Détecte et regroupe les niveaux S/R sur les `lookback` dernières bougies.
+
+    `atr_value` (ATR déjà connu à la dernière bougie) évite de recalculer un
+    ATR à chaque appel — important pour la vitesse du backtest.
+    """
     sub = df.iloc[-lookback:] if len(df) > lookback else df
     sub = sub.reset_index(drop=True)
     idx_highs, idx_lows = find_pivots(sub, window)
 
-    a = atr_fn(sub).iloc[-1]
+    if atr_value is not None and np.isfinite(atr_value) and atr_value > 0:
+        a = atr_value
+    else:
+        a = atr_fn(sub).iloc[-1]
     if not np.isfinite(a) or a <= 0:
         a = sub["close"].iloc[-1] * 0.005  # repli : 0.5 % du prix
     tol = cluster_atr * a
@@ -116,12 +124,12 @@ def detect_breakout(
 
     close = df["close"].iloc[i]
     prev_close = df["close"].iloc[i - 1]
-    a = atr_fn(df).iloc[i]
+    a = df["atr"].iloc[i] if "atr" in df.columns else atr_fn(df).iloc[i]
     if not np.isfinite(a) or a <= 0:
         a = close * 0.005
     buf = buffer_atr * a
 
-    vma = volume_ma(df).iloc[i]
+    vma = df["vol_ma"].iloc[i] if "vol_ma" in df.columns else volume_ma(df).iloc[i]
     volume_ok = bool(np.isfinite(vma) and df["volume"].iloc[i] >= volume_mult * vma)
 
     # Cassure haussière : on était sous une résistance, on clôture franchement au-dessus.
@@ -166,13 +174,13 @@ def detect_retest(
     high = df["high"].iloc[i]
     open_ = df["open"].iloc[i]
 
-    a = atr_fn(df).iloc[i]
+    a = df["atr"].iloc[i] if "atr" in df.columns else atr_fn(df).iloc[i]
     if not np.isfinite(a) or a <= 0:
         a = close * 0.005
     buf = buffer_atr * a
     tol = tol_atr * a
 
-    vma = volume_ma(df).iloc[i]
+    vma = df["vol_ma"].iloc[i] if "vol_ma" in df.columns else volume_ma(df).iloc[i]
     volume_ok = bool(np.isfinite(vma) and df["volume"].iloc[i] >= volume_mult * vma)
 
     window_close = df["close"].iloc[i - lookback : i]

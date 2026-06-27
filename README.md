@@ -43,17 +43,33 @@ scalping/
 ├── strategy.py        # moteur de signaux (cassure/retest + ADX + multi-timeframe)
 ├── backtest.py        # backtester réaliste + métriques
 ├── pattern_stats.py   # espérance réelle de chaque pattern sur tes données
+├── walkforward.py     # validation in-sample / out-of-sample
 └── broker_alpaca.py   # exécution Alpaca Paper (ordres bracket OCO)
 run_backtest.py        # CLI backtest
+run_walkforward.py     # CLI walk-forward (validation OOS)
 run_live.py            # CLI live (alertes paper, ou exécution Alpaca)
 analyze_patterns.py    # CLI : classe les patterns par espérance
+fetch_data.py          # CLI : télécharge l'historique Binance -> CSV
+setup.sh / Makefile    # installation et commandes "clé en main"
 ```
+
+> 🚀 **Pour tout mettre en place pas à pas, suis [`GUIDE.md`](GUIDE.md).**
 
 Tout fonctionne à partir d'un **DataFrame OHLCV standard** (`time, open, high, low, close, volume`) → agnostique à la source de données.
 
 ---
 
 ## 3. Installation
+
+Clé en main (crée `.venv`, installe tout, prépare `.env`) :
+
+```bash
+./setup.sh
+source .venv/bin/activate
+make test          # 21 tests doivent passer
+```
+
+Ou manuellement :
 
 ```bash
 pip install -r requirements.txt
@@ -96,6 +112,15 @@ python analyze_patterns.py --csv data/btc_5m.csv --save stats.csv
 
 Sortie : un tableau trié par espérance (en R). On garde les patterns à
 espérance positive avec assez d'occurrences, on désactive les autres.
+
+### Walk-forward (validation honnête)
+
+```bash
+python run_walkforward.py --csv data/btc_5m.csv --is 2000 --oos 500
+```
+
+Choisit les réglages sur l'in-sample et les évalue sur l'out-of-sample
+(jamais vu). Si l'OOS s'effondre → sur-apprentissage, on ne trade pas.
 
 ### Tests
 

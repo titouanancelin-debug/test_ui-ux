@@ -40,12 +40,27 @@ def _exit_fill(level: float, direction: str, slippage: float) -> float:
     return level * (1 - slippage) if direction == "BUY" else level * (1 + slippage)
 
 
-def run_backtest(df: pd.DataFrame, cfg: StrategyConfig | None = None) -> dict:
+def run_backtest(
+    df: pd.DataFrame,
+    cfg: StrategyConfig | None = None,
+    prep=None,
+    start_idx: int | None = None,
+    end_idx: int | None = None,
+) -> dict:
+    """Backtest sur tout le DataFrame, ou sur une fenêtre [start_idx, end_idx).
+
+    `prep` (résultat de strategy.prepare) peut être fourni pour éviter de
+    recalculer les indicateurs/pivots — utile en walk-forward où l'on teste
+    plusieurs fenêtres sur les mêmes données.
+    """
     cfg = cfg or StrategyConfig()
-    prep = prepare(df, cfg)
+    if prep is None:
+        prep = prepare(df, cfg)
     d = prep.df
     n = len(d)
-    start = max(cfg.ema_slow, 30) + cfg.pivot_window
+    warmup = max(cfg.ema_slow, 30) + cfg.pivot_window
+    start = max(warmup, start_idx) if start_idx is not None else warmup
+    stop_at = min(end_idx, n) if end_idx is not None else n
 
     trades: list[Trade] = []
     equity = cfg.capital
@@ -54,7 +69,7 @@ def run_backtest(df: pd.DataFrame, cfg: StrategyConfig | None = None) -> dict:
     position = None          # dict décrivant la position ouverte
     pending = None           # Signal en attente d'exécution à l'ouverture suivante
 
-    for j in range(start, n):
+    for j in range(start, stop_at):
         bar = d.iloc[j]
         o, h, l = float(bar["open"]), float(bar["high"]), float(bar["low"])
 
@@ -126,7 +141,7 @@ def run_backtest(df: pd.DataFrame, cfg: StrategyConfig | None = None) -> dict:
                         position["stop"] = min(position["stop"], new_stop)
 
         # 3) Chercher un nouveau signal (à la clôture de cette bougie) si on est plat.
-        if position is None and pending is None and j < n - 1:
+        if position is None and pending is None and j < stop_at - 1:
             sig = generate_signal(prep, j, cfg)
             if sig is not None:
                 pending = sig

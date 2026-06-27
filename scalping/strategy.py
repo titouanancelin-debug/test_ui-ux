@@ -111,12 +111,16 @@ def generate_signal(
 
     row = df.iloc[i]
     price = float(row["close"])
-    atr_i = float(atr_fn(df).iloc[i])
+    # ATR pré-calculé (colonne ajoutée par add_indicators) -> évite un recalcul
+    # O(n) à chaque bougie, ce qui rendait le backtest O(n²).
+    atr_i = float(row["atr"]) if "atr" in df.columns else float(atr_fn(df).iloc[i])
     if atr_i <= 0:
         return None
 
+    # On ne slice que la fenêtre nécessaire (et non df[:i+1] croissant) -> O(lookback)/bougie.
+    lo = max(0, i + 1 - cfg.sr_lookback)
     levels = detect_levels(
-        df.iloc[: i + 1], cfg.sr_lookback, cfg.pivot_window, cfg.sr_cluster_atr
+        df.iloc[lo : i + 1], cfg.sr_lookback, cfg.pivot_window, cfg.sr_cluster_atr, atr_value=atr_i
     )
     trend = _trend(row)
     rsi_v = float(row["rsi"])

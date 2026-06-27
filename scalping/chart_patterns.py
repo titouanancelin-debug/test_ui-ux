@@ -37,17 +37,22 @@ class ChartPattern:
 
 
 def _atr_at(df: pd.DataFrame, i: int) -> float:
-    a = atr_fn(df).iloc[i]
+    # Réutilise la colonne ATR pré-calculée si elle existe (perf backtest).
+    a = df["atr"].iloc[i] if "atr" in df.columns else atr_fn(df).iloc[i]
     if not np.isfinite(a) or a <= 0:
         a = df["close"].iloc[i] * 0.005
     return float(a)
 
 
 def _recent(idx_list, df, col, i, window, n=6):
-    """Pivots confirmés à i, sous forme [(idx, prix)], les n plus récents."""
-    usable = [j for j in idx_list if j <= i - window]
-    pts = [(j, float(df[col].iloc[j])) for j in usable]
-    return pts[-n:]
+    """Pivots confirmés à i, sous forme [(idx, prix)], les n plus récents.
+
+    On filtre puis on tronque AVANT de lire les prix (et via .iat, rapide) :
+    inutile de matérialiser le prix de tous les pivots pour n'en garder que n.
+    """
+    usable = [j for j in idx_list if j <= i - window][-n:]
+    col_vals = df[col]
+    return [(j, float(col_vals.iat[j])) for j in usable]
 
 
 def _slope(p1, p2):

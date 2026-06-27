@@ -4,6 +4,7 @@ from scalping.config import StrategyConfig
 from scalping.backtest import run_backtest
 from scalping.strategy import prepare, generate_signal, mtf_trend_series
 from scalping.pattern_stats import evaluate_patterns
+from scalping.walkforward import walk_forward
 
 
 def test_backtest_runs_and_reports():
@@ -12,6 +13,25 @@ def test_backtest_runs_and_reports():
     assert len(res["equity_curve"]) > 0
     m = res["metrics"]
     assert "n_trades" in m
+
+
+def test_backtest_window_subset():
+    df = synthetic_ohlcv(n=1500)
+    cfg = StrategyConfig()
+    prep = prepare(df, cfg)
+    full = run_backtest(df, cfg, prep=prep)["metrics"].get("n_trades", 0)
+    part = run_backtest(df, cfg, prep=prep, start_idx=800, end_idx=1200)["metrics"].get("n_trades", 0)
+    # Une fenêtre restreinte ne peut pas produire plus de trades que tout l'historique.
+    assert part <= full
+
+
+def test_walk_forward_runs():
+    df = synthetic_ohlcv(n=4000)
+    res = walk_forward(df, is_bars=1500, oos_bars=500)
+    assert "summary" in res
+    assert res["summary"]["n_folds"] >= 1
+    for f in res["folds"]:
+        assert f["oos_range"][0] >= f["is_range"][1]  # OOS après IS (anti-lookahead)
 
 
 def test_signal_shape():
