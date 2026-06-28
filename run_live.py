@@ -39,6 +39,7 @@ from scalping.levels import detect_levels
 from scalping.indicators import add_indicators
 from scalping.notifier import notify_signal, notify_order, notify_error, notify_startup, notify_equity
 from scalping.trade_logger import log_signal
+from scalping.market_regime import funding_signal_adjustment, CorrelationManager
 
 # ---------------------------------------------------------------------------
 # Définition des stratégies validées en backtest sur 2+ ans
@@ -106,7 +107,8 @@ def _fetch(strat: dict) -> "pd.DataFrame":
     return pd.DataFrame()
 
 
-def analyze_once(strat: dict, cfg: StrategyConfig, broker=None) -> None:
+def analyze_once(strat: dict, cfg: StrategyConfig, broker=None,
+                 corr_mgr: "CorrelationManager | None" = None) -> None:
     data_sym      = strat["data_sym"]
     a_sym         = strat.get("alpaca_sym")
     interval      = strat["interval"]
@@ -160,12 +162,32 @@ def analyze_once(strat: dict, cfg: StrategyConfig, broker=None) -> None:
         print(f"  🔍 [{data_sym} {interval}] pas de signal (clôture {df['close'].iloc[-1]:.4f})")
         return
 
-    plan = build_trade_plan(sig.direction, sig.entry, sig.stop, cfg, sig.levels, capital=cfg.capital)
-    if plan is None:
-        print(f"  🔍 [{data_sym} {interval}] signal {sig.direction} rejeté (plan invalide)")
+    # ── Funding rate filter ──────────────────────────────────────────────
+    fr_mult, fr_msg = funding_signal_adjustment(data_sym, sig.direction)
+    adj_confidence  = sig.confidence * fr_mult
+    if fr_msg:
+        print(f"     💹 {fr_msg}")
+    if adj_confidence < cfg.min_confidence:
+        print(f"  ⛔ [{data_sym} {interval}] signal {sig.direction} annulé par funding rate (conf {adj_confidence:.0%} < {cfg.min_confidence:.0%})")
         return
 
-    print(f"\n  🎯 SIGNAL {sig.direction} [{data_sym} {interval}] | confiance {sig.confidence:.0%}")
+    # ── Corrélation des positions ────────────────────────────────────────
+    adj_risk = cfg.risk_percent
+    if corr_mgr is not None:
+        adj_risk, corr_msg = corr_mgr.adjusted_risk(data_sym, cfg.risk_percent)
+        if corr_msg:
+            print(f"     📊 {corr_msg}")
+        if adj_risk <= 0:
+            return
+    cfg_adj = make_cfg(cfg.capital)
+    cfg_adj.risk_percent = adj_risk
+
+    plan = build_trade_plan(sig.direction, sig.entry, sig.stop, cfg_adj, sig.levels, capital=cfg.capital)
+    if plan is None:
+        print(f"  🔍 [{data_sym} {interval}] signal {sig.direction} rejeté (plan invalide après ajustement)")
+        return
+
+    print(f"\n  🎯 SIGNAL {sig.direction} [{data_sym} {interval}] | confiance {adj_confidence:.0%}")
     print(f"     Entrée ~{plan.entry:.4f} | SL {plan.stop:.4f} | TP {plan.take_profit:.4f}")
     print(f"     Qty {plan.qty:.6f} | Notionnel {plan.notional:.2f}$ | Risque {plan.risk_amount:.2f}$")
     print("     Raisons : " + " ; ".join(sig.reasons))
@@ -250,9 +272,10 @@ def main():
 
     # Timestamp du dernier passage par stratégie (index).
     last_run:    dict[int, float] = {}
-    last_recap:  float = 0.0          # dernier récap quotidien envoyé
-    peak_equity: float = capital       # plus haut capital atteint (circuit breaker)
-    MAX_DD_PCT   = 15.0                # % de drawdown max avant arrêt d'urgence
+    last_recap:  float = 0.0
+    peak_equity: float = capital
+    MAX_DD_PCT   = 15.0
+    corr_mgr     = CorrelationManager()
 
     while True:
         now_ts  = time.time()
@@ -291,7 +314,7 @@ def main():
             if args.once or now_ts - last >= sec - 60:
                 last_run[idx] = now_ts
                 try:
-                    analyze_once(strat, cfg, broker)
+                    analyze_once(strat, cfg, broker, corr_mgr)
                 except Exception as e:
                     print(f"  ⚠️  Erreur [{strat['data_sym']}] : {e}")
                 time.sleep(1)
