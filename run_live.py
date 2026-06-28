@@ -107,6 +107,11 @@ def _fetch(strat: dict) -> "pd.DataFrame":
     return pd.DataFrame()
 
 
+# Cooldown anti-doublon : (symbol, interval, direction) → timestamp dernier signal
+_last_signal: dict[tuple, float] = {}
+SIGNAL_COOLDOWN = 4 * 3600  # 4h minimum entre deux signaux identiques sur le même actif
+
+
 def analyze_once(strat: dict, cfg: StrategyConfig, broker=None,
                  corr_mgr: "CorrelationManager | None" = None) -> None:
     data_sym      = strat["data_sym"]
@@ -209,6 +214,14 @@ def analyze_once(strat: dict, cfg: StrategyConfig, broker=None,
                 err = res.get("error", "inconnu")
                 print(f"     ❌ Ordre refusé : {err}")
                 notify_error(a_sym, err)
+
+    # Anti-doublon : ignorer si même signal < 4h
+    sig_key = (data_sym, interval, sig.direction)
+    now_ts  = time.time()
+    if now_ts - _last_signal.get(sig_key, 0) < SIGNAL_COOLDOWN:
+        print(f"  ⏭️  [{data_sym} {interval}] signal {sig.direction} déjà émis récemment — ignoré")
+        return
+    _last_signal[sig_key] = now_ts
 
     notify_signal(data_sym, interval, sig.direction, plan.entry, plan.stop, plan.take_profit,
                   sig.confidence, sig.reasons, strategy="breakout")
