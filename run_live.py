@@ -47,15 +47,16 @@ from scalping.trade_logger import log_signal
 # strategy_type: "breakout" (défaut) | "mr" (Mean Reversion)
 # alpaca_sym : None = pas d'exécution Alpaca (alerte seule)
 STRATEGIES = [
-    # ── Crypto 4h sur Alpaca (exécution automatique) ──────────────────────
-    {"source": "binance", "data_sym": "BTCUSDT",  "alpaca_sym": "BTC/USD",  "interval": "4h", "interval_sec": 4*3600, "limit": 500, "strategy_type": "breakout"},  # 36% WR, +2.6%
-    {"source": "binance", "data_sym": "SOLUSDT",  "alpaca_sym": "SOL/USD",  "interval": "4h", "interval_sec": 4*3600, "limit": 500, "strategy_type": "breakout"},  # 37% WR, +5.3%
-    {"source": "binance", "data_sym": "LINKUSDT", "alpaca_sym": "LINK/USD", "interval": "4h", "interval_sec": 4*3600, "limit": 500, "strategy_type": "breakout"},  # 42% WR, +21%
-    {"source": "binance", "data_sym": "AAVEUSDT", "alpaca_sym": "AAVE/USD", "interval": "4h", "interval_sec": 4*3600, "limit": 500, "strategy_type": "breakout"},  # 35% WR, +37%
-    # ── Crypto 4h — alerte Telegram seule (pas dispo sur Alpaca) ──────────
-    {"source": "binance", "data_sym": "INJUSDT",  "alpaca_sym": None, "interval": "4h", "interval_sec": 4*3600, "limit": 500, "strategy_type": "breakout"},  # 41% WR, +24%
-    {"source": "binance", "data_sym": "OPUSDT",   "alpaca_sym": None, "interval": "4h", "interval_sec": 4*3600, "limit": 500, "strategy_type": "breakout"},  # 40% WR, +16%
-    {"source": "binance", "data_sym": "SUIUSDT",  "alpaca_sym": None, "interval": "4h", "interval_sec": 4*3600, "limit": 500, "strategy_type": "breakout"},  # 40% WR, +14%
+    # ── Crypto 4h sur Alpaca — tendances longues (BTC/SOL marchent mieux en 4h) ──
+    {"source": "binance", "data_sym": "BTCUSDT", "alpaca_sym": "BTC/USD", "interval": "4h", "interval_sec": 4*3600, "limit": 500, "strategy_type": "breakout"},  # 36% WR, +2.6%
+    {"source": "binance", "data_sym": "SOLUSDT", "alpaca_sym": "SOL/USD", "interval": "4h", "interval_sec": 4*3600, "limit": 500, "strategy_type": "breakout"},  # 37% WR, +5.3%
+    # ── Crypto 2h sur Alpaca — 2x plus de signaux, validés en 2h ─────────
+    {"source": "binance", "data_sym": "LINKUSDT", "alpaca_sym": "LINK/USD", "interval": "2h", "interval_sec": 2*3600, "limit": 500, "strategy_type": "breakout"},  # 35% WR, +23%
+    {"source": "binance", "data_sym": "AAVEUSDT", "alpaca_sym": "AAVE/USD", "interval": "2h", "interval_sec": 2*3600, "limit": 500, "strategy_type": "breakout"},  # 34% WR, +16%
+    # ── Crypto 2h — alerte Telegram seule (pas dispo sur Alpaca) ──────────
+    {"source": "binance", "data_sym": "INJUSDT", "alpaca_sym": None, "interval": "2h", "interval_sec": 2*3600, "limit": 500, "strategy_type": "breakout"},  # 32% WR, +5%
+    {"source": "binance", "data_sym": "OPUSDT",  "alpaca_sym": None, "interval": "2h", "interval_sec": 2*3600, "limit": 500, "strategy_type": "breakout"},  # 37% WR, +39%
+    {"source": "binance", "data_sym": "SUIUSDT", "alpaca_sym": None, "interval": "4h", "interval_sec": 4*3600, "limit": 500, "strategy_type": "breakout"},  # 34% WR, +14% (4h validé)
     # ── Stocks US 1h (marché ouvert 09:30-16:00 ET) ───────────────────────
     {"source": "alpaca_stocks", "data_sym": "MSFT", "alpaca_sym": "MSFT", "interval": "1Hour", "interval_sec": 3600, "limit": 500, "strategy_type": "breakout"},
     {"source": "alpaca_stocks", "data_sym": "TSLA", "alpaca_sym": "TSLA", "interval": "1Hour", "interval_sec": 3600, "limit": 500, "strategy_type": "breakout"},
