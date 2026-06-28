@@ -47,18 +47,20 @@ from scalping.trade_logger import log_signal
 # strategy_type: "breakout" (défaut) | "mr" (Mean Reversion)
 # alpaca_sym : None = pas d'exécution Alpaca (alerte seule)
 STRATEGIES = [
-    # --- Crypto 4h validées (win rate > 33% ET retour > 0% sur 2 ans) ---
+    # ── Crypto 4h sur Alpaca (exécution automatique) ──────────────────────
     {"source": "binance", "data_sym": "BTCUSDT",  "alpaca_sym": "BTC/USD",  "interval": "4h", "interval_sec": 4*3600, "limit": 500, "strategy_type": "breakout"},  # 36% WR, +2.6%
     {"source": "binance", "data_sym": "SOLUSDT",  "alpaca_sym": "SOL/USD",  "interval": "4h", "interval_sec": 4*3600, "limit": 500, "strategy_type": "breakout"},  # 37% WR, +5.3%
     {"source": "binance", "data_sym": "LINKUSDT", "alpaca_sym": "LINK/USD", "interval": "4h", "interval_sec": 4*3600, "limit": 500, "strategy_type": "breakout"},  # 42% WR, +21%
-    {"source": "binance", "data_sym": "INJUSDT",  "alpaca_sym": "INJ/USD",  "interval": "4h", "interval_sec": 4*3600, "limit": 500, "strategy_type": "breakout"},  # 41% WR, +24%
-    {"source": "binance", "data_sym": "OPUSDT",   "alpaca_sym": "OP/USD",   "interval": "4h", "interval_sec": 4*3600, "limit": 500, "strategy_type": "breakout"},  # 40% WR, +16%
-    {"source": "binance", "data_sym": "SUIUSDT",  "alpaca_sym": "SUI/USD",  "interval": "4h", "interval_sec": 4*3600, "limit": 500, "strategy_type": "breakout"},  # 40% WR, +14%
-    # --- Stocks US 1h (marché ouvert 09:30-16:00 ET) ---
+    {"source": "binance", "data_sym": "AAVEUSDT", "alpaca_sym": "AAVE/USD", "interval": "4h", "interval_sec": 4*3600, "limit": 500, "strategy_type": "breakout"},  # 35% WR, +37%
+    # ── Crypto 4h — alerte Telegram seule (pas dispo sur Alpaca) ──────────
+    {"source": "binance", "data_sym": "INJUSDT",  "alpaca_sym": None, "interval": "4h", "interval_sec": 4*3600, "limit": 500, "strategy_type": "breakout"},  # 41% WR, +24%
+    {"source": "binance", "data_sym": "OPUSDT",   "alpaca_sym": None, "interval": "4h", "interval_sec": 4*3600, "limit": 500, "strategy_type": "breakout"},  # 40% WR, +16%
+    {"source": "binance", "data_sym": "SUIUSDT",  "alpaca_sym": None, "interval": "4h", "interval_sec": 4*3600, "limit": 500, "strategy_type": "breakout"},  # 40% WR, +14%
+    # ── Stocks US 1h (marché ouvert 09:30-16:00 ET) ───────────────────────
     {"source": "alpaca_stocks", "data_sym": "MSFT", "alpaca_sym": "MSFT", "interval": "1Hour", "interval_sec": 3600, "limit": 500, "strategy_type": "breakout"},
     {"source": "alpaca_stocks", "data_sym": "TSLA", "alpaca_sym": "TSLA", "interval": "1Hour", "interval_sec": 3600, "limit": 500, "strategy_type": "breakout"},
     {"source": "alpaca_stocks", "data_sym": "AMZN", "alpaca_sym": "AMZN", "interval": "1Hour", "interval_sec": 3600, "limit": 500, "strategy_type": "breakout"},
-    # --- Or 1h — Mean Reversion (53% win rate ✅, alerte seule) ---
+    # ── Or 1h — Mean Reversion (53% WR ✅, alerte seule) ──────────────────
     {"source": "yfinance_mr", "data_sym": "GC=F", "alpaca_sym": None, "interval": "1h", "interval_sec": 3600, "limit": 500, "strategy_type": "mr", "mr_rr": 1.5},
 ]
 

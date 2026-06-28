@@ -62,7 +62,7 @@ fi
 
 # --- Démarrage ---
 cd "$BOT_DIR"
-nohup $PYTHON run_live.py "$@" >> "$LOG_FILE" 2>&1 &
+nohup env PYTHONUNBUFFERED=1 $PYTHON run_live.py "$@" >> "$LOG_FILE" 2>&1 &
 PID=$!
 echo $PID > "$PID_FILE"
 
