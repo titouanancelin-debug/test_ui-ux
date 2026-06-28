@@ -191,6 +191,31 @@ def analyze_once(strat: dict, cfg: StrategyConfig, broker=None) -> None:
                plan.take_profit, sig.confidence, executed=executed, equity=cfg.capital)
 
 
+def _send_daily_recap(capital: float, peak: float, drawdown_pct: float) -> None:
+    """Envoie un récap quotidien sur Telegram à 08:00 UTC."""
+    import csv, os
+    log = os.path.join(os.path.dirname(__file__), "trades_log.csv")
+    total = wins = losses = 0
+    if os.path.exists(log):
+        with open(log) as f:
+            for row in csv.DictReader(f):
+                total += 1
+    lines = [
+        "📊 <b>RÉCAP QUOTIDIEN</b>",
+        f"",
+        f"💰 Capital    : {capital:,.2f}$",
+        f"📈 Pic        : {peak:,.2f}$",
+        f"📉 Drawdown   : -{drawdown_pct:.1f}%",
+        f"",
+        f"📋 Signaux total : {total}",
+        f"🎯 Objectif      : 30 signaux pour valider",
+        f"⏳ Restant       : {max(0, 30 - total)} signaux",
+    ]
+    from scalping.notifier import send
+    send("\n".join(lines))
+    print(f"  📨 Récap quotidien envoyé ({total} signaux cumulés)")
+
+
 def main():
     p = argparse.ArgumentParser(description="Live multi-stratégie — capital progressif")
     p.add_argument("--once",    action="store_true", help="Une seule passe puis sortie")
@@ -221,24 +246,45 @@ def main():
     notify_startup(len(STRATEGIES), capital, mode)
 
     # Timestamp du dernier passage par stratégie (index).
-    last_run: dict[int, float] = {}
+    last_run:    dict[int, float] = {}
+    last_recap:  float = 0.0          # dernier récap quotidien envoyé
+    peak_equity: float = capital       # plus haut capital atteint (circuit breaker)
+    MAX_DD_PCT   = 15.0                # % de drawdown max avant arrêt d'urgence
 
     while True:
         now_ts  = time.time()
-        now_str = datetime.now(timezone.utc).strftime("%H:%M:%S UTC")
+        now_utc = datetime.now(timezone.utc)
+        now_str = now_utc.strftime("%H:%M:%S UTC")
 
-        # Mise à jour de l'équité réelle à chaque cycle.
+        # ── Mise à jour de l'équité réelle ──────────────────────────────
         if broker is not None:
             capital = broker.get_equity()
 
+        peak_equity = max(peak_equity, capital)
+
+        # ── Circuit breaker ──────────────────────────────────────────────
+        drawdown_pct = (peak_equity - capital) / peak_equity * 100
+        if drawdown_pct >= MAX_DD_PCT:
+            msg = (f"🚨 CIRCUIT BREAKER déclenché !\n"
+                   f"Drawdown : -{drawdown_pct:.1f}% (seuil {MAX_DD_PCT}%)\n"
+                   f"Capital : {capital:,.2f}$ (pic : {peak_equity:,.2f}$)\n"
+                   f"Bot arrêté. Analyse manuelle requise avant relance.")
+            print(f"\n{msg}")
+            notify_error("CIRCUIT BREAKER", msg)
+            break
+
         cfg = make_cfg(capital)
 
-        print(f"\n⏰ [{now_str}] capital {capital:,.2f}$ — analyse...")
+        # ── Récap quotidien à 08:00 UTC ──────────────────────────────────
+        if now_utc.hour == 8 and now_ts - last_recap > 23 * 3600:
+            last_recap = now_ts
+            _send_daily_recap(capital, peak_equity, drawdown_pct)
+
+        print(f"\n⏰ [{now_str}] capital {capital:,.2f}$ (DD {drawdown_pct:.1f}%) — analyse...")
 
         for idx, strat in enumerate(STRATEGIES):
             sec  = strat["interval_sec"]
             last = last_run.get(idx, 0)
-            # Déclencher si le délai de cet actif est écoulé (±60 s de marge).
             if args.once or now_ts - last >= sec - 60:
                 last_run[idx] = now_ts
                 try:
