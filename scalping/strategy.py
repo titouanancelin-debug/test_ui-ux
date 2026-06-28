@@ -123,8 +123,16 @@ def generate_signal(
     macd_hist = float(row["macd_hist"])
     adx_v = float(row["adx"])
     htf = int(row["htf_trend"]) if (cfg.use_mtf and "htf_trend" in df.columns) else 0
+    ma200_v = float(row["ma200"]) if "ma200" in df.columns else None
 
     bull, bear, reasons = 0.0, 0.0, []
+
+    # --- 0. Filtre macro MA200 : on n'achète qu'au-dessus, on ne vend qu'en dessous ---
+    if cfg.use_ma200_filter and ma200_v is not None and not pd.isna(ma200_v):
+        above_ma200 = price > ma200_v
+        below_ma200 = price < ma200_v
+    else:
+        above_ma200 = below_ma200 = True
 
     # --- 1. Cassure / retest S/R (signal principal) ---
     if cfg.require_retest:
@@ -135,7 +143,8 @@ def generate_signal(
         kind, base_w = "Retest", 0.50
     else:
         bo = detect_breakout(
-            df, i, levels, cfg.breakout_buffer_atr, cfg.breakout_volume_mult
+            df, i, levels, cfg.breakout_buffer_atr, cfg.breakout_volume_mult,
+            cfg.breakout_body_pct, cfg.breakout_min_touches,
         )
         kind, base_w = "Cassure", 0.45
 
@@ -168,26 +177,28 @@ def generate_signal(
     elif macd_hist < 0:
         bear += 0.10
 
-    # --- 4. Patterns chandeliers ---
-    candle_score = cs.directional_score(prep.flags, i)
-    if candle_score > 0:
-        bull += min(0.20, 0.07 * candle_score)
-        reasons.append("Chandeliers haussiers: " + ", ".join(cs.patterns_at(prep.flags, i)))
-    elif candle_score < 0:
-        bear += min(0.20, 0.07 * abs(candle_score))
-        reasons.append("Chandeliers baissiers: " + ", ".join(cs.patterns_at(prep.flags, i)))
+    # --- 4. Patterns chandeliers (désactivés par défaut : pas d'espérance positive sur crypto) ---
+    if cfg.use_candle_patterns:
+        candle_score = cs.directional_score(prep.flags, i)
+        if candle_score > 0:
+            bull += min(0.20, 0.07 * candle_score)
+            reasons.append("Chandeliers haussiers: " + ", ".join(cs.patterns_at(prep.flags, i)))
+        elif candle_score < 0:
+            bear += min(0.20, 0.07 * abs(candle_score))
+            reasons.append("Chandeliers baissiers: " + ", ".join(cs.patterns_at(prep.flags, i)))
 
-    # --- 5. Figures chartistes ---
-    charts = cp.detect_chart_patterns(
-        df, i, prep.pivots, cfg.pivot_window, buffer_atr=cfg.breakout_buffer_atr
-    )
-    for pat in charts:
-        if pat.direction > 0:
-            bull += 0.15
-            reasons.append(f"Figure: {pat.name}")
-        else:
-            bear += 0.15
-            reasons.append(f"Figure: {pat.name}")
+    # --- 5. Figures chartistes (désactivées par défaut : trop peu d'occurrences fiables) ---
+    if cfg.use_chart_patterns:
+        charts = cp.detect_chart_patterns(
+            df, i, prep.pivots, cfg.pivot_window, buffer_atr=cfg.breakout_buffer_atr
+        )
+        for pat in charts:
+            if pat.direction > 0:
+                bull += 0.15
+                reasons.append(f"Figure: {pat.name}")
+            else:
+                bear += 0.15
+                reasons.append(f"Figure: {pat.name}")
 
     # --- 6. Garde-fous RSI (on calme l'enthousiasme aux extrêmes) ---
     if rsi_v >= cfg.rsi_overbought:
@@ -209,6 +220,28 @@ def generate_signal(
     if abs(net) < 1e-9:
         return None
     direction = "BUY" if net > 0 else "SELL"
+
+    # Veto MA200 : on n'achète qu'au-dessus, on ne vend qu'en dessous.
+    if cfg.use_ma200_filter and ma200_v is not None and not pd.isna(ma200_v):
+        if direction == "BUY" and not above_ma200:
+            return None
+        if direction == "SELL" and not below_ma200:
+            return None
+        reasons.append(f"MA200 {'au-dessus' if above_ma200 else 'en dessous'} ({ma200_v:.0f})")
+
+    # Veto EMA : on n'achète qu'en tendance haussière, on ne vend qu'en tendance baissière.
+    if cfg.require_ema_trend:
+        if direction == "BUY" and trend != "BULLISH":
+            return None
+        if direction == "SELL" and trend != "BEARISH":
+            return None
+
+    # Veto MACD : l'histogramme doit confirmer la direction du trade.
+    if cfg.require_macd_confirm:
+        if direction == "BUY" and macd_hist <= 0:
+            return None
+        if direction == "SELL" and macd_hist >= 0:
+            return None
 
     # Veto multi-timeframe : on ne prend pas de trade à contre-tendance du TF supérieur.
     if cfg.use_mtf and htf != 0:

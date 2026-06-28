@@ -7,10 +7,12 @@ Convention de DataFrame utilisée PARTOUT dans le projet :
     - prix   : float
     - index  : RangeIndex (0..n-1)
 
-Trois sources :
-  - Binance (klines publiques, sans clé) : get_candles_binance()
-  - CSV local                            : load_csv()
-  - Générateur synthétique (offline)     : synthetic_ohlcv()
+Sources disponibles :
+  - Binance (crypto, sans clé)       : get_candles_binance(), get_history_binance()
+  - yfinance (stocks, ETF, forex)    : get_candles_yf()
+  - Alpaca data API (stocks live)    : get_candles_alpaca_stocks()
+  - CSV local                        : load_csv()
+  - Générateur synthétique (offline) : synthetic_ohlcv()
 """
 from __future__ import annotations
 
@@ -124,6 +126,87 @@ def get_history_binance(symbol: str, interval: str, total: int = 5000) -> pd.Dat
     full["time"] = pd.to_datetime(full["time"], unit="ms", utc=True)
     full = full.drop_duplicates(subset="time").sort_values("time").reset_index(drop=True)
     return _coerce_ohlcv(full)
+
+
+def get_candles_yf(
+    symbol: str,
+    interval: str = "1h",
+    period: str = "2y",
+) -> pd.DataFrame:
+    """Données OHLCV via yfinance — stocks US, ETF, forex, indices.
+
+    Symboles utiles :
+      Stocks : "AAPL", "NVDA", "SPY", "QQQ"
+      Forex  : "EURUSD=X", "GBPUSD=X", "USDJPY=X", "XAUUSD=X"
+    Intervalles supportés : 1m, 5m, 15m, 30m, 1h, 1d, 1wk
+    Note : les données intraday (≤1h) sont limitées à ~60 jours par yfinance.
+    """
+    try:
+        import yfinance as yf
+    except ImportError:
+        raise ImportError("Installe yfinance : pip install yfinance")
+
+    yf_interval = {"4h": "1h"}.get(interval, interval)
+
+    ticker = yf.Ticker(symbol)
+    df = ticker.history(period=period, interval=yf_interval, auto_adjust=True)
+    if df.empty:
+        return pd.DataFrame(columns=OHLCV_COLUMNS)
+
+    df = df.reset_index()
+    df.columns = [str(c).lower() for c in df.columns]
+    for cand in ("datetime", "date", "timestamp"):
+        if cand in df.columns:
+            df = df.rename(columns={cand: "time"})
+            break
+    if "time" not in df.columns:
+        df["time"] = range(len(df))
+
+    df["time"] = pd.to_datetime(df["time"], utc=True)
+    missing = {"open", "high", "low", "close", "volume"} - set(df.columns)
+    if missing:
+        return pd.DataFrame(columns=OHLCV_COLUMNS)
+    return _coerce_ohlcv(df)
+
+
+def get_candles_alpaca_stocks(
+    symbol: str,
+    interval: str = "1Hour",
+    limit: int = 1000,
+) -> pd.DataFrame:
+    """Données OHLCV pour actions US via l'API data Alpaca (clés dans .env).
+
+    Intervalles : 1Min, 5Min, 15Min, 30Min, 1Hour, 4Hour, 1Day
+    """
+    import os
+    api_key    = os.environ.get("ALPACA_API_KEY", "")
+    api_secret = os.environ.get("ALPACA_API_SECRET", "")
+    if not api_key or not api_secret:
+        raise RuntimeError("ALPACA_API_KEY / ALPACA_API_SECRET absents (voir .env)")
+
+    tf_map = {"1h": "1Hour", "4h": "4Hour", "1d": "1Day"}
+    timeframe = tf_map.get(interval.lower(), interval)
+
+    url = f"https://data.alpaca.markets/v2/stocks/{symbol}/bars"
+    headers = {"APCA-API-KEY-ID": api_key, "APCA-API-SECRET-KEY": api_secret}
+    params  = {"timeframe": timeframe, "limit": min(limit, 10000),
+                "adjustment": "split", "feed": "iex"}
+    try:
+        r = requests.get(url, headers=headers, params=params, timeout=10)
+        if r.status_code != 200:
+            print(f"⚠️  Alpaca data HTTP {r.status_code} [{symbol}]")
+            return pd.DataFrame(columns=OHLCV_COLUMNS)
+        bars = r.json().get("bars", [])
+        if not bars:
+            return pd.DataFrame(columns=OHLCV_COLUMNS)
+        df = pd.DataFrame(bars)
+        df = df.rename(columns={"t": "time", "o": "open", "h": "high",
+                                 "l": "low",  "c": "close", "v": "volume"})
+        df["time"] = pd.to_datetime(df["time"], utc=True)
+        return _coerce_ohlcv(df)
+    except Exception as e:
+        print(f"⚠️  Erreur Alpaca data [{symbol}] : {e}")
+        return pd.DataFrame(columns=OHLCV_COLUMNS)
 
 
 def save_csv(df: pd.DataFrame, path: str) -> None:

@@ -19,3 +19,5 @@ backtest_results/
 .DS_Store
 .idea/
 .vscode/
+bot.pid
+trades_log.csv

@@ -17,15 +17,17 @@ from __future__ import annotations
 import argparse
 
 from scalping.config import StrategyConfig
-from scalping.data import get_candles_binance, load_csv, synthetic_ohlcv
+from scalping.data import (get_candles_binance, get_history_binance,
+                            get_candles_yf, load_csv, synthetic_ohlcv)
 from scalping.backtest import run_backtest, print_report
 
 
 def parse_args():
     p = argparse.ArgumentParser(description="Backtest scalping (patterns + cassures S/R)")
     src = p.add_mutually_exclusive_group()
-    src.add_argument("--symbol", default="BTCUSDT", help="Symbole Binance (défaut BTCUSDT)")
-    src.add_argument("--csv", help="Chemin d'un CSV OHLCV")
+    src.add_argument("--symbol", default="BTCUSDT", help="Symbole Binance crypto (ex: BTCUSDT)")
+    src.add_argument("--yf",     help="Symbole yfinance — stocks/forex (ex: AAPL, EURUSD=X)")
+    src.add_argument("--csv",    help="Chemin d'un CSV OHLCV")
     src.add_argument("--synthetic", action="store_true", help="Données synthétiques hors-ligne")
 
     p.add_argument("--interval", default="5m", help="Intervalle Binance (défaut 5m)")
@@ -77,9 +79,15 @@ def main():
     elif args.synthetic:
         print(f"🧪 Génération de {args.bars} bougies synthétiques...")
         df = synthetic_ohlcv(n=args.bars)
+    elif args.yf:
+        print(f"📈 yfinance {args.yf} {args.interval} (2 ans)...")
+        df = get_candles_yf(args.yf, args.interval, period="2y")
     else:
         print(f"🌐 Récupération Binance {args.symbol} {args.interval} ({args.limit} bougies)...")
-        df = get_candles_binance(args.symbol, args.interval, args.limit)
+        if args.limit > 1000:
+            df = get_history_binance(args.symbol, args.interval, args.limit)
+        else:
+            df = get_candles_binance(args.symbol, args.interval, args.limit)
 
     if df.empty or len(df) < 100:
         print("❌ Données insuffisantes pour backtester.")

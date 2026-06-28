@@ -118,4 +118,5 @@ def add_indicators(df: pd.DataFrame, cfg=None) -> pd.DataFrame:
     out["atr"] = atr(out, cfg.atr_period)
     out["adx"] = adx(out, cfg.atr_period)
     out["vol_ma"] = volume_ma(out, 20)
+    out["ma200"] = sma(out["close"], cfg.ma200_period)
     return out

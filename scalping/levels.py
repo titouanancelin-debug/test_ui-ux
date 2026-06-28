@@ -101,38 +101,51 @@ def detect_breakout(
     df: pd.DataFrame,
     i: int,
     levels: list[Level],
-    buffer_atr: float = 0.10,
-    volume_mult: float = 1.3,
+    buffer_atr: float = 0.15,
+    volume_mult: float = 1.5,
+    body_pct: float = 0.40,
+    min_touches: int = 2,
 ) -> Breakout | None:
     """Teste si la bougie CLÔTURÉE i casse une zone S/R.
 
     Filtres anti-faux-breakout :
-      - la CLÔTURE (pas juste la mèche) dépasse le niveau d'au moins
-        buffer_atr * ATR,
-      - le volume dépasse volume_mult * sa moyenne.
+      - la CLÔTURE dépasse le niveau d'au moins buffer_atr * ATR,
+      - le volume dépasse volume_mult * sa moyenne,
+      - le corps de la bougie représente au moins body_pct du range
+        (filtre les cassures sur bougies indécises / doji).
     """
     if i < 1 or i >= len(df):
         return None
 
     close = df["close"].iloc[i]
+    open_ = df["open"].iloc[i]
+    high = df["high"].iloc[i]
+    low = df["low"].iloc[i]
     prev_close = df["close"].iloc[i - 1]
+
     a = atr_fn(df).iloc[i]
     if not np.isfinite(a) or a <= 0:
         a = close * 0.005
     buf = buffer_atr * a
 
+    candle_range = high - low
+    body = abs(close - open_)
+    body_strong = candle_range <= 0 or (body / candle_range) >= body_pct
+
     vma = volume_ma(df).iloc[i]
     volume_ok = bool(np.isfinite(vma) and df["volume"].iloc[i] >= volume_mult * vma)
 
-    # Cassure haussière : on était sous une résistance, on clôture franchement au-dessus.
-    for lv in [l for l in levels if l.kind == "resistance"]:
+    # Cassure haussière : clôture franche au-dessus, bougie haussière forte, niveau solide.
+    for lv in [l for l in levels if l.kind == "resistance" and l.touches >= min_touches]:
         if prev_close <= lv.price + buf and close > lv.price + buf:
-            return Breakout("BUY", lv.price, volume_ok, i)
+            if close > open_ and body_strong:
+                return Breakout("BUY", lv.price, volume_ok, i)
 
-    # Cassure baissière : on était au-dessus d'un support, on clôture franchement en dessous.
-    for lv in [l for l in levels if l.kind == "support"]:
+    # Cassure baissière : clôture franche en dessous, bougie baissière forte, niveau solide.
+    for lv in [l for l in levels if l.kind == "support" and l.touches >= min_touches]:
         if prev_close >= lv.price - buf and close < lv.price - buf:
-            return Breakout("SELL", lv.price, volume_ok, i)
+            if close < open_ and body_strong:
+                return Breakout("SELL", lv.price, volume_ok, i)
 
     return None
 

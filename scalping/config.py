@@ -33,21 +33,22 @@ class StrategyConfig:
     """Paramètres de la stratégie et de la gestion du risque."""
 
     capital: float = field(default_factory=lambda: _env_float("CAPITAL", 200.0))
-    risk_percent: float = field(default_factory=lambda: _env_float("RISK_PERCENT", 1.0))
+    risk_percent: float = field(default_factory=lambda: _env_float("RISK_PERCENT", 1.5))
     rr_ratio: float = field(default_factory=lambda: _env_float("RR_RATIO", 2.0))
 
-    # Frais aller-retour estimés (en fraction). 0.001 = 0.1 % par côté.
-    # Crucial en scalping : des frais sous-estimés rendent un backtest menteur.
-    fee_rate: float = 0.001
+    # Frais aller-retour estimés (en fraction).
+    # 0.001 = taker (0.1%/côté) | 0.0005 = maker limit order (0.05%/côté)
+    fee_rate: float = 0.0005
     # Slippage estimé par côté (fraction du prix).
-    slippage: float = 0.0005
+    slippage: float = 0.0002
 
     # Plafond de notionnel par position en fraction du capital (anti
     # sur-effet-de-levier quand le stop est très serré).
     max_notional_pct: float = 1.0
 
     # Trailing stop (fraction). None = désactivé.
-    trailing_pct: float | None = 0.003
+    # Désactivé : sur crypto le trailing à 0.3% coupe les trades gagnants avant le TP.
+    trailing_pct: float | None = None
 
     # --- Filtres de signal ---
     ema_fast: int = 20
@@ -63,8 +64,10 @@ class StrategyConfig:
     sr_cluster_atr: float = 0.5    # regroupe les niveaux distants de < 0.5*ATR
 
     # --- Cassure (breakout) ---
-    breakout_buffer_atr: float = 0.10   # marge au-delà du niveau (en ATR)
-    breakout_volume_mult: float = 1.3   # volume mini = 1.3x la moyenne
+    breakout_buffer_atr: float = 0.15   # marge au-delà du niveau (en ATR)
+    breakout_volume_mult: float = 1.5   # volume mini = 1.5x la moyenne
+    breakout_body_pct: float = 0.40     # corps mini = 40% du range (filtre bougies faibles)
+    breakout_min_touches: int = 2       # niveaux testés au moins N fois (plus fiables)
     require_retest: bool = False        # exiger un retest du niveau cassé
     retest_lookback: int = 12           # fenêtre (bougies) pour retrouver la cassure à retester
 
@@ -75,6 +78,22 @@ class StrategyConfig:
     # --- Multi-timeframe ---
     use_mtf: bool = False               # exiger l'alignement avec un TF supérieur
     htf_multiplier: int = 3             # TF sup = htf_multiplier × TF d'entrée (5m×3 = 15m)
+
+    # Activer / désactiver les composantes du score.
+    # Les backtests montrent que les patterns chandeliers et figures
+    # n'ont pas d'espérance positive sur crypto en TF courts.
+    use_candle_patterns: bool = False
+    use_chart_patterns: bool = False
+
+    # Filtre macro : ne prendre que des trades dans le sens de la MA200.
+    use_ma200_filter: bool = False
+    ma200_period: int = 200
+
+    # Veto EMA : la direction du trade DOIT être alignée avec la tendance EMA.
+    require_ema_trend: bool = False
+
+    # Veto MACD : histogramme MACD doit confirmer la direction.
+    require_macd_confirm: bool = False
 
     # Score minimal (0..1) pour émettre un signal.
     min_confidence: float = 0.5

@@ -64,7 +64,7 @@ def run_backtest(df: pd.DataFrame, cfg: StrategyConfig | None = None) -> dict:
             pending = None
             slip = cfg.slippage
             entry_fill = o * (1 + slip) if sig.direction == "BUY" else o * (1 - slip)
-            plan = build_trade_plan(sig.direction, entry_fill, sig.stop, cfg, sig.levels)
+            plan = build_trade_plan(sig.direction, entry_fill, sig.stop, cfg, sig.levels, capital=equity)
             if plan is not None:
                 entry_fee = cfg.fee_rate * plan.qty * entry_fill
                 position = {

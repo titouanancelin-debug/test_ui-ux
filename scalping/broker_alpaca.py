@@ -51,6 +51,11 @@ class AlpacaClient:
         r.raise_for_status()
         return r.json()
 
+    def get_equity(self) -> float:
+        """Retourne l'équité totale du compte (cash + positions non réalisées)."""
+        acct = self.get_account()
+        return float(acct.get("equity") or acct.get("portfolio_value") or acct["cash"])
+
     def get_positions(self) -> list[dict]:
         r = self._request("GET", "/v2/positions")
         return r.json() if r.status_code == 200 else []

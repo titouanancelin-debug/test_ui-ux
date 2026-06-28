@@ -28,18 +28,22 @@ class TradePlan:
 
 
 def position_size(
-    entry: float, stop: float, cfg: StrategyConfig
+    entry: float, stop: float, cfg: StrategyConfig, capital: float | None = None
 ) -> tuple[float, float]:
-    """Renvoie (qty, notionnel) en respectant le risque ET le plafond de notionnel."""
-    risk_amount = cfg.capital * (cfg.risk_percent / 100.0)
+    """Renvoie (qty, notionnel) en respectant le risque ET le plafond de notionnel.
+
+    `capital` permet de passer l'équité courante (compound growth) plutôt que
+    le capital initial fixé dans la config.
+    """
+    cap = capital if capital is not None else cfg.capital
+    risk_amount = cap * (cfg.risk_percent / 100.0)
     stop_dist = abs(entry - stop)
     if stop_dist <= 0:
         return 0.0, 0.0
 
     qty = risk_amount / stop_dist
 
-    # Plafond de notionnel (anti sur-exposition quand le stop est très serré).
-    max_notional = cfg.capital * cfg.max_notional_pct
+    max_notional = cap * cfg.max_notional_pct
     if qty * entry > max_notional:
         qty = max_notional / entry
 
@@ -53,23 +57,12 @@ def take_profit_price(
     cfg: StrategyConfig,
     levels: list[Level] | None = None,
 ) -> float:
-    """TP basé sur le ratio R/R, éventuellement borné par le prochain niveau S/R."""
+    """TP basé uniquement sur le ratio R/R (sans plafonnage S/R qui écrase les gains)."""
     stop_dist = abs(entry - stop)
     if direction == "BUY":
-        tp = entry + stop_dist * cfg.rr_ratio
-        if levels:
-            above = [lv.price for lv in levels if lv.kind == "resistance" and lv.price > entry + 0.3 * stop_dist]
-            if above:
-                # On ne vise pas au-delà de la prochaine résistance.
-                tp = min(tp, min(above))
-        return tp
+        return entry + stop_dist * cfg.rr_ratio
     else:
-        tp = entry - stop_dist * cfg.rr_ratio
-        if levels:
-            below = [lv.price for lv in levels if lv.kind == "support" and lv.price < entry - 0.3 * stop_dist]
-            if below:
-                tp = max(tp, max(below))
-        return tp
+        return entry - stop_dist * cfg.rr_ratio
 
 
 def build_trade_plan(
@@ -78,14 +71,18 @@ def build_trade_plan(
     stop: float,
     cfg: StrategyConfig,
     levels: list[Level] | None = None,
+    capital: float | None = None,
 ) -> TradePlan | None:
-    """Construit un plan de trade complet, ou None s'il est invalide."""
+    """Construit un plan de trade complet, ou None s'il est invalide.
+
+    `capital` permet de passer l'équité courante pour un sizing progressif.
+    """
     if direction not in ("BUY", "SELL"):
         return None
     if (direction == "BUY" and stop >= entry) or (direction == "SELL" and stop <= entry):
-        return None  # stop du mauvais côté
+        return None
 
-    qty, notional = position_size(entry, stop, cfg)
+    qty, notional = position_size(entry, stop, cfg, capital)
     if qty <= 0:
         return None
 
