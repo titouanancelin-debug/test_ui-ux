@@ -518,84 +518,105 @@ const AGENDA_FILTERS = [
   { id:"événement", label:"Évènement" },
 ];
 
+const SEASON_MONTHS = [
+  { key:"Mar 2026",  label:"Mars" },
+  { key:"Avr 2026",  label:"Avril" },
+  { key:"Mai 2026",  label:"Mai" },
+  { key:"Juin 2026", label:"Juin" },
+  { key:"Juil 2026", label:"Juillet" },
+  { key:"Août 2026", label:"Août" },
+  { key:"Sep 2026",  label:"Septembre" },
+];
+
 const Agenda = ({ setRoute, setSpectacle }) => {
   const [filter, setFilter] = useState("tout");
-  const [month, setMonth] = useState("Tous");
 
-  const months = useMemo(() => {
-    const seen = new Set();
-    const result = [];
-    AGENDA.forEach(d => {
+  const grouped = useMemo(() => {
+    const base = filter === "tout" ? AGENDA : AGENDA.filter(d => d.type === filter);
+    const map = {};
+    base.forEach(d => {
       const key = d.month + " " + d.year;
-      if (!seen.has(key)) { seen.add(key); result.push({ key, label: d.month + " " + d.year }); }
+      if (!map[key]) map[key] = [];
+      map[key].push(d);
     });
-    return result;
-  }, []);
-
-  const list = useMemo(() => {
-    let result = filter === "tout" ? AGENDA : AGENDA.filter(d => d.type === filter);
-    if (month !== "Tous") result = result.filter(d => d.month + " " + d.year === month);
-    return result;
-  }, [filter, month]);
+    return map;
+  }, [filter]);
 
   return (
     <section className="section" style={{ position:"relative", overflow:"hidden" }}>
-      <div ref={useParallax(0.18, 110)} className="motif-bg" style={{ right:-80, top:80, opacity:0.25 }}>
+      <div ref={useParallax(0.18, 110)} className="motif-bg" style={{ right:-80, top:80, opacity:0.15 }}>
         <Motif size={380} color="var(--plum)" berryColor="var(--terra)" rotate={-20} seed={2.7}/>
       </div>
+
       <Reveal variant="up" className="section-head">
         <div className="section-num">№ 02 / Saison</div>
         <h2 className="section-title">Agenda<br/><span className="display-italic">2025 — 2026.</span></h2>
         <div className="section-meta">{AGENDA.length} rendez-vous · spectacles, ateliers, résidences & événements.</div>
       </Reveal>
 
-      {/* Filtres : type à gauche, mois à droite */}
-      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", gap:16, marginBottom:48, flexWrap:"wrap" }}>
-        <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
-          {AGENDA_FILTERS.map(f => (
-            <button key={f.id}
-              className={`tweak-pill ${filter === f.id ? "active" : ""}`}
-              onClick={() => setFilter(f.id)}
-              style={ filter === f.id && f.id !== "tout" ? { background: TYPE_CONFIG[f.id]?.color, color:"#fff", borderColor: TYPE_CONFIG[f.id]?.color } : {} }
-            >
-              {f.label}
-              {f.id !== "tout" && (
-                <span style={{ marginLeft:6, fontSize:10, opacity:0.7 }}>
-                  {AGENDA.filter(d => d.type === f.id).length}
-                </span>
-              )}
-            </button>
-          ))}
-        </div>
-        <div style={{ display:"flex", gap:8, alignItems:"center", flexWrap:"wrap" }}>
-          <span style={{ fontSize:11, fontFamily:"var(--ff-mono)", letterSpacing:"0.1em", textTransform:"uppercase", opacity:0.45 }}>Mois</span>
-          <button className={`tweak-pill ${month === "Tous" ? "active" : ""}`} onClick={() => setMonth("Tous")}>Tous</button>
-          {months.map(m => (
-            <button key={m.key}
-              className={`tweak-pill ${month === m.key ? "active" : ""}`}
-              onClick={() => setMonth(m.key)}
-            >
-              {m.label}
-            </button>
-          ))}
-        </div>
+      {/* Filtre par type */}
+      <div style={{ display:"flex", gap:8, marginBottom:56, flexWrap:"wrap" }}>
+        {AGENDA_FILTERS.map(f => (
+          <button key={f.id}
+            className={`tweak-pill ${filter === f.id ? "active" : ""}`}
+            onClick={() => setFilter(f.id)}
+            style={ filter === f.id && f.id !== "tout" ? { background: TYPE_CONFIG[f.id]?.color, color:"#fff", borderColor: TYPE_CONFIG[f.id]?.color } : {} }
+          >
+            {f.label}
+            {f.id !== "tout" && (
+              <span style={{ marginLeft:6, fontSize:10, opacity:0.7 }}>
+                {AGENDA.filter(d => d.type === f.id).length}
+              </span>
+            )}
+          </button>
+        ))}
       </div>
 
-      {/* Grille 3 colonnes */}
-      {list.length === 0 ? (
-        <p style={{ color:"var(--ink-soft)", fontStyle:"italic" }}>Aucun rendez-vous dans cette catégorie pour le moment.</p>
-      ) : (
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"var(--grid-gap)" }}>
-          {list.map((d, i) => (
-            <Reveal key={i} variant="up" delay={(i % 3) * 70}>
-              <AgendaCard
-                d={d}
-                onClick={d.spectacle ? () => { setSpectacle(d.spectacle); setRoute("spectacles/detail"); } : null}
-              />
-            </Reveal>
-          ))}
-        </div>
-      )}
+      {/* Sections par mois avec en-têtes sticky */}
+      {SEASON_MONTHS.map(m => {
+        const events = grouped[m.key] || [];
+        return (
+          <div key={m.key}>
+            {/* En-tête de mois sticky */}
+            <div style={{
+              position:"sticky", top:56, zIndex:10,
+              background:"color-mix(in oklab, var(--paper) 94%, transparent)",
+              backdropFilter:"blur(10px)",
+              borderTop:"1px solid var(--rule-strong)",
+              borderBottom:"1px solid var(--rule)",
+              padding:"10px 0",
+              display:"flex", alignItems:"baseline", justifyContent:"space-between",
+              marginBottom: events.length > 0 ? 32 : 20,
+            }}>
+              <h3 className="display" style={{ fontSize:"clamp(32px, 4vw, 56px)", lineHeight:1 }}>
+                <span className="display-italic">{m.label}</span>
+                <span style={{ fontSize:"0.42em", opacity:0.35, marginLeft:"0.5em", fontStyle:"normal", fontFamily:"var(--ff-mono)", letterSpacing:"0.05em" }}>2026</span>
+              </h3>
+              <span style={{ fontFamily:"var(--ff-mono)", fontSize:11, letterSpacing:"0.12em", textTransform:"uppercase", opacity:0.45 }}>
+                {events.length > 0 ? `${events.length} rendez-vous` : "Relâche"}
+              </span>
+            </div>
+
+            {/* Événements ou message vide */}
+            {events.length > 0 ? (
+              <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"var(--grid-gap)", marginBottom:64 }}>
+                {events.map((d, i) => (
+                  <Reveal key={i} variant="up" delay={(i % 3) * 70}>
+                    <AgendaCard
+                      d={d}
+                      onClick={d.spectacle ? () => { setSpectacle(d.spectacle); setRoute("spectacles/detail"); } : null}
+                    />
+                  </Reveal>
+                ))}
+              </div>
+            ) : (
+              <p style={{ fontFamily:"var(--ff-display)", fontStyle:"italic", fontSize:18, color:"var(--ink-soft)", opacity:0.45, marginBottom:56, paddingLeft:2 }}>
+                Aucun rendez-vous programmé.
+              </p>
+            )}
+          </div>
+        );
+      })}
     </section>
   );
 };
