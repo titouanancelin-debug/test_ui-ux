@@ -128,9 +128,10 @@ const HERO_F2   = "images/p4.jpg";
 const SCROLL_H = 2200;
 
 const ParallaxHero = ({ setRoute }) => {
-  const centerRef  = useRef(null);
-  const leftPanel  = useRef(null);
-  const rightPanel = useRef(null);
+  const centerRef = useRef(null);
+  const float0    = useRef(null);
+  const float1    = useRef(null);
+  const float2    = useRef(null);
 
   useEffect(() => {
     if (prefersReduced()) return;
@@ -138,11 +139,16 @@ const ParallaxHero = ({ setRoute }) => {
     const update = () => {
       raf = null;
       const p = Math.min(Math.max(window.scrollY / SCROLL_H, 0), 1);
-      // image de fond : dézoome pendant le scroll (sensation d'avancer dans le couloir)
-      if (centerRef.current)  centerRef.current.style.backgroundSize  = `${170 - 70 * p}%`;
-      // parois du couloir : glissent vers l'extérieur
-      if (leftPanel.current)  leftPanel.current.style.transform  = `translateX(${-p * 108}%)`;
-      if (rightPanel.current) rightPanel.current.style.transform = `translateX(${p * 108}%)`;
+      const c = 28 * (1 - p);
+      const e = 100 - c;
+      if (centerRef.current) {
+        centerRef.current.style.clipPath = `polygon(${c}% ${c}%, ${e}% ${c}%, ${e}% ${e}%, ${c}% ${e}%)`;
+        centerRef.current.style.backgroundSize = `${170 - 70 * p}%`;
+      }
+      const shifts = [-180, 230, -120];
+      [float0, float1, float2].forEach((r, i) => {
+        if (r.current) r.current.style.transform = `translateY(${p * shifts[i]}px)`;
+      });
     };
     const onScroll = () => { if (!raf) raf = requestAnimationFrame(update); };
     update();
@@ -150,58 +156,47 @@ const ParallaxHero = ({ setRoute }) => {
     return () => { window.removeEventListener("scroll", onScroll); if (raf) cancelAnimationFrame(raf); };
   }, []);
 
+  const floatStyle = (top, side, w, extra = {}) => ({
+    position:"absolute", [side[0]]:side[1], top, width:w, zIndex:3,
+    willChange:"transform", overflow:"hidden", borderRadius:3,
+    boxShadow:"0 16px 48px rgba(0,0,0,0.55)", ...extra,
+  });
+
   return (
     <div style={{ height:`calc(${SCROLL_H}px + 100vh)`, position:"relative" }}>
       <div style={{ position:"sticky", top:0, height:"100vh", overflow:"hidden", background:"#1A0E08" }}>
 
-        {/* Image principale — plein écran, dézoome au scroll comme le fond d'un couloir */}
+        {/* Image centrale qui s'ouvre au scroll */}
         <div ref={centerRef} style={{
           position:"absolute", inset:0,
           backgroundImage:`url(${HERO_MAIN})`,
           backgroundSize:"170%", backgroundPosition:"center",
           backgroundRepeat:"no-repeat",
-          willChange:"background-size",
+          clipPath:"polygon(28% 28%, 72% 28%, 72% 72%, 28% 72%)",
+          willChange:"clip-path, background-size",
         }}/>
 
-        {/* Paroi gauche — float0 (haut) + float2 (bas), glisse vers la gauche */}
-        <div ref={leftPanel} style={{
-          position:"absolute", left:0, top:0, bottom:0, width:"25%",
-          zIndex:2, willChange:"transform",
-        }}>
-          <div style={{
-            position:"absolute", top:0, left:0, right:0, height:"calc(56% - 2px)",
-            backgroundImage:`url(${HERO_F0})`, backgroundSize:"cover", backgroundPosition:"center top",
-          }}/>
-          <div style={{ position:"absolute", top:"56%", left:0, right:0, height:3, background:"#1A0E08" }}/>
-          <div style={{
-            position:"absolute", top:"calc(56% + 3px)", left:0, right:0, bottom:0,
-            backgroundImage:`url(${HERO_F2})`, backgroundSize:"cover", backgroundPosition:"center",
-          }}/>
-          {/* ombre sur le bord intérieur — donne la profondeur du couloir */}
-          <div style={{ position:"absolute", inset:0, pointerEvents:"none",
-            background:"linear-gradient(to left, rgba(20,10,5,0.7) 0%, transparent 50%)" }}/>
+        {/* Image flottante droite haute */}
+        <div ref={float0} style={floatStyle("7%", ["right","21%"], "18%")}>
+          <div style={{ paddingTop:"135%", background:`url(${HERO_F0}) center/cover` }}/>
         </div>
 
-        {/* Paroi droite — float1, glisse vers la droite */}
-        <div ref={rightPanel} style={{
-          position:"absolute", right:0, top:0, bottom:0, width:"21%",
-          zIndex:2, willChange:"transform",
-        }}>
-          <div style={{
-            position:"absolute", inset:0,
-            backgroundImage:`url(${HERO_F1})`, backgroundSize:"cover", backgroundPosition:"center",
-          }}/>
-          {/* ombre sur le bord intérieur */}
-          <div style={{ position:"absolute", inset:0, pointerEvents:"none",
-            background:"linear-gradient(to right, rgba(20,10,5,0.7) 0%, transparent 50%)" }}/>
+        {/* Image flottante droite */}
+        <div ref={float1} style={floatStyle("32%", ["right","2%"], "17%")}>
+          <div style={{ paddingTop:"125%", background:`url(${HERO_F1}) center/cover` }}/>
         </div>
 
-        {/* Dégradé gauche — au-dessus des parois pour la lisibilité du texte */}
-        <div style={{ position:"absolute", inset:0, zIndex:3, pointerEvents:"none",
-          background:"linear-gradient(to right, rgba(20,10,5,0.93) 0%, rgba(20,10,5,0.72) 36%, rgba(20,10,5,0.18) 60%, transparent 100%)" }}/>
+        {/* Image flottante gauche basse */}
+        <div ref={float2} style={{ ...floatStyle("auto", ["left","7%"], "15%"), bottom:"18%" }}>
+          <div style={{ paddingTop:"115%", background:`url(${HERO_F2}) center/cover` }}/>
+        </div>
+
+        {/* Dégradé gauche — zIndex 4 pour couvrir les photos flottantes */}
+        <div style={{ position:"absolute", inset:0, zIndex:4,
+          background:"linear-gradient(to right, rgba(20,10,5,0.93) 0%, rgba(20,10,5,0.72) 38%, rgba(20,10,5,0.18) 62%, transparent 100%)" }}/>
 
         {/* Dégradé bas */}
-        <div style={{ position:"absolute", bottom:0, left:0, right:0, height:180, zIndex:4, pointerEvents:"none",
+        <div style={{ position:"absolute", bottom:0, left:0, right:0, height:180, zIndex:4,
           background:"linear-gradient(to bottom, transparent, #1A0E08)" }}/>
 
         {/* Texte hero */}
