@@ -20,7 +20,7 @@ const ATELIER_CATS = [
 const Nav = ({ route, setRoute, setAtelierAudience }) => {
   const [scrolled, setScrolled] = useState(false);
   const [atelierOpen, setAtelierOpen] = useState(false);
-  const dropdownRef = React.useRef(null);
+  const dropdownRef = useRef(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
