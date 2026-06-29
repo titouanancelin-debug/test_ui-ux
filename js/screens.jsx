@@ -364,9 +364,9 @@ const AgendaRow = ({ d, onClick }) => {
 
 /* ======================= SPECTACLES (liste) ======================= */
 const TRAVAIL_TABS = [
-  { id:"creations",  label:"Créations",  num:"01" },
-  { id:"fabrique",   label:"La fabrique", num:"02" },
-  { id:"mediations", label:"Médiations",  num:"03" },
+  { id:"creations",  label:"Créations",   num:"01", title:"Nos créations",       sub:"Des formes vivantes en répertoire et en tournée." },
+  { id:"fabrique",   label:"La fabrique", num:"02", title:"La fabrique",          sub:"Les résidences de création en cours." },
+  { id:"mediations", label:"Médiations",  num:"03", title:"Médiations & pratiques", sub:"Ateliers, transmissions, actions de territoire." },
 ];
 
 const Spectacles = ({ setRoute, setSpectacle }) => {
@@ -398,20 +398,26 @@ const Spectacles = ({ setRoute, setSpectacle }) => {
         backdropFilter:"blur(10px)",
         borderBottom:"1px solid var(--rule-strong)",
       }}>
-        <div style={{ display:"flex", padding:"0 var(--pad-x)" }}>
-          {TRAVAIL_TABS.map(t => (
-            <button key={t.id} onClick={() => setTab(t.id)} style={{
-              padding:"16px 24px 14px",
-              background:"none", border:"none",
-              borderBottom: tab === t.id ? "2px solid var(--terra)" : "2px solid transparent",
-              cursor:"pointer", display:"flex", flexDirection:"column", alignItems:"center", gap:4,
-              transition:"color 0.2s, border-color 0.2s",
-              color: tab === t.id ? "var(--terra)" : "var(--ink-soft)",
-            }}>
-              <span style={{ fontFamily:"var(--ff-body)", fontSize:13, fontWeight: tab === t.id ? 600 : 400 }}>{t.label}</span>
-              <span style={{ fontFamily:"var(--ff-mono)", fontSize:10, opacity:0.45 }}>{t.num}</span>
-            </button>
-          ))}
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"0 var(--pad-x)" }}>
+          <div style={{ display:"flex" }}>
+            {TRAVAIL_TABS.map(t => (
+              <button key={t.id} onClick={() => setTab(t.id)} style={{
+                padding:"16px 24px 14px",
+                background:"none", border:"none",
+                borderBottom: tab === t.id ? "2px solid var(--terra)" : "2px solid transparent",
+                cursor:"pointer", display:"flex", flexDirection:"column", alignItems:"center", gap:4,
+                transition:"color 0.2s, border-color 0.2s",
+                color: tab === t.id ? "var(--terra)" : "var(--ink-soft)",
+              }}>
+                <span style={{ fontFamily:"var(--ff-body)", fontSize:13, fontWeight: tab === t.id ? 600 : 400 }}>{t.label}</span>
+                <span style={{ fontFamily:"var(--ff-mono)", fontSize:10, opacity:0.45 }}>{t.num}</span>
+              </button>
+            ))}
+          </div>
+          {/* Titre de la section active */}
+          <span className="display-italic" style={{ fontSize:"clamp(18px, 2vw, 26px)", color:"var(--terra)", opacity:0.85, paddingRight:4 }}>
+            {TRAVAIL_TABS.find(t => t.id === tab)?.title}
+          </span>
         </div>
       </div>
 
