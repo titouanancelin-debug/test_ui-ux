@@ -58,8 +58,4 @@ const PARTENAIRES = [
   { name:"ADAMI", type:"Soutien" },
 ];
 
-window.SPECTACLES = SPECTACLES;
-window.AGENDA = AGENDA;
-window.ATELIERS = ATELIERS;
-window.EQUIPE = EQUIPE;
-window.PARTENAIRES = PARTENAIRES;
+export { SPECTACLES, AGENDA, ATELIERS, EQUIPE, PARTENAIRES };

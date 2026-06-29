@@ -1,7 +1,7 @@
 /* FX : boîte à outils d'animations — scroll-reveal, parallax, rideau, spotlight.
    Tout respecte prefers-reduced-motion (dégradation gracieuse vers statique). */
 
-const { useRef, useEffect, useState, useCallback } = React;
+import { useRef, useEffect, useState, useCallback } from 'react';
 
 /* Détecte la préférence système OU la classe .anim-off posée par le panneau Tweaks */
 const prefersReduced = () =>
@@ -229,11 +229,4 @@ const initFX = () => {
 
 const initCursor = () => {}; // curseur désactivé
 
-window.prefersReduced = prefersReduced;
-window.initCursor = initCursor;
-window.useReveal = useReveal;
-window.Reveal = Reveal;
-window.useParallax = useParallax;
-window.useMagnetic = useMagnetic;
-window.KineticTitle = KineticTitle;
-window.initFX = initFX;
+export { prefersReduced, useReveal, Reveal, useParallax, useMagnetic, KineticTitle, initFX };

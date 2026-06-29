@@ -1,6 +1,9 @@
 /* Écrans : Home, Spectacles, FicheSpectacle, Agenda, Ateliers, Équipe, Partenaires, Contact */
 
-const { useState, useEffect, useMemo } = React;
+import { useState, useEffect, useMemo, useRef } from 'react';
+import { Motif, MotifMark, Poster } from './motif.jsx';
+import { SPECTACLES, AGENDA, ATELIERS, EQUIPE, PARTENAIRES } from './data.jsx';
+import { prefersReduced, Reveal, KineticTitle, useParallax } from './fx.jsx';
 
 /* ======================= NAV ======================= */
 const Nav = ({ route, setRoute }) => {
@@ -674,14 +677,4 @@ const Footer = ({ setRoute }) => (
   </footer>
 );
 
-window.Nav = Nav;
-window.Home = Home;
-window.Spectacles = Spectacles;
-window.FicheSpectacle = FicheSpectacle;
-window.Agenda = Agenda;
-window.Ateliers = Ateliers;
-window.Equipe = Equipe;
-window.Partenaires = Partenaires;
-window.Contact = Contact;
-window.Footer = Footer;
-window.Newsletter = Newsletter;
+export { Nav, Home, Spectacles, FicheSpectacle, Agenda, Ateliers, Equipe, Partenaires, Contact, Footer };

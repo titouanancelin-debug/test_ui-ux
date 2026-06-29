@@ -160,8 +160,4 @@ const Poster = ({ bg = "#B84A2E", ink = "#F4E8D5", title = "", subtitle = "", nu
   );
 };
 
-window.Lantern = Lantern;
-window.Motif = Motif;
-window.MotifHero = MotifHero;
-window.MotifMark = MotifMark;
-window.Poster = Poster;
+export { Lantern, Motif, MotifHero, MotifMark, Poster };
