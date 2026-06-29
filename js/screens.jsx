@@ -520,10 +520,23 @@ const AGENDA_FILTERS = [
 
 const Agenda = ({ setRoute, setSpectacle }) => {
   const [filter, setFilter] = useState("tout");
+  const [month, setMonth] = useState("Tous");
 
-  const list = useMemo(() =>
-    filter === "tout" ? AGENDA : AGENDA.filter(d => d.type === filter),
-  [filter]);
+  const months = useMemo(() => {
+    const seen = new Set();
+    const result = [];
+    AGENDA.forEach(d => {
+      const key = d.month + " " + d.year;
+      if (!seen.has(key)) { seen.add(key); result.push({ key, label: d.month + " " + d.year }); }
+    });
+    return result;
+  }, []);
+
+  const list = useMemo(() => {
+    let result = filter === "tout" ? AGENDA : AGENDA.filter(d => d.type === filter);
+    if (month !== "Tous") result = result.filter(d => d.month + " " + d.year === month);
+    return result;
+  }, [filter, month]);
 
   return (
     <section className="section" style={{ position:"relative", overflow:"hidden" }}>
@@ -536,8 +549,8 @@ const Agenda = ({ setRoute, setSpectacle }) => {
         <div className="section-meta">{AGENDA.length} rendez-vous · spectacles, ateliers, résidences & événements.</div>
       </Reveal>
 
-      {/* Bande de filtre par pastilles */}
-      <div style={{ display:"flex", gap:8, marginBottom:48, flexWrap:"wrap" }}>
+      {/* Filtre par type */}
+      <div style={{ display:"flex", gap:8, marginBottom:12, flexWrap:"wrap" }}>
         {AGENDA_FILTERS.map(f => (
           <button key={f.id}
             className={`tweak-pill ${filter === f.id ? "active" : ""}`}
@@ -550,6 +563,20 @@ const Agenda = ({ setRoute, setSpectacle }) => {
                 {AGENDA.filter(d => d.type === f.id).length}
               </span>
             )}
+          </button>
+        ))}
+      </div>
+
+      {/* Filtre par mois */}
+      <div style={{ display:"flex", gap:8, marginBottom:48, flexWrap:"wrap", alignItems:"center" }}>
+        <span style={{ fontSize:11, fontFamily:"var(--ff-mono)", letterSpacing:"0.1em", textTransform:"uppercase", opacity:0.45, marginRight:4 }}>Mois</span>
+        <button className={`tweak-pill ${month === "Tous" ? "active" : ""}`} onClick={() => setMonth("Tous")}>Tous</button>
+        {months.map(m => (
+          <button key={m.key}
+            className={`tweak-pill ${month === m.key ? "active" : ""}`}
+            onClick={() => setMonth(m.key)}
+          >
+            {m.label}
           </button>
         ))}
       </div>
