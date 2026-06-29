@@ -1,0 +1,20 @@
+<svg width="320" height="64" viewBox="0 0 320 64" xmlns="http://www.w3.org/2000/svg">
+  <rect width="320" height="64" fill="#3A1B2E"/>
+  <!-- Mark : physalis lanterne -->
+  <g transform="translate(32,56) scale(0.36)">
+    <path d="M0,0 C-52,-18,-75,-60,-50,-100 C-28,-122,0,-132,0,-132" stroke="#F4E8D5" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M0,0 C52,-18,75,-60,50,-100 C28,-122,0,-132,0,-132" stroke="#F4E8D5" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M0,0 C-26,-14,-44,-52,-28,-92 C-14,-118,0,-132,0,-132" stroke="#F4E8D5" stroke-width="1.8" fill="none" opacity=".7" stroke-linecap="round"/>
+    <path d="M0,0 C26,-14,44,-52,28,-92 C14,-118,0,-132,0,-132" stroke="#F4E8D5" stroke-width="1.8" fill="none" opacity=".7" stroke-linecap="round"/>
+    <path d="M0,0 C1,-32,0,-82,0,-132" stroke="#F4E8D5" stroke-width="1.2" fill="none" opacity=".55" stroke-linecap="round"/>
+    <path d="M-42,-30 C-15,-38,15,-38,42,-30" stroke="#F4E8D5" stroke-width="2.2" fill="none" opacity=".55"/>
+    <path d="M-60,-56 C-24,-64,24,-64,60,-56" stroke="#F4E8D5" stroke-width="1.9" fill="none" opacity=".48"/>
+    <path d="M-64,-82 C-24,-90,24,-90,64,-82" stroke="#F4E8D5" stroke-width="1.6" fill="none" opacity=".42"/>
+    <ellipse cx="0" cy="-66" rx="22" ry="24" fill="#E8B542" opacity=".92"/>
+    <ellipse cx="-7" cy="-74" rx="6" ry="7" fill="rgba(255,255,255,0.22)"/>
+    <circle cx="0" cy="-132" r="3" fill="#F4E8D5" opacity=".55"/>
+  </g>
+  <!-- Wordmark -->
+  <text x="68" y="28" fill="#F4E8D5" font-family="Georgia, serif" font-size="17" font-weight="400" letter-spacing="0.08em">CIE ROULETABILLE</text>
+  <text x="68" y="48" fill="#E8B542" font-family="Georgia, serif" font-size="13" font-style="italic" letter-spacing="0.04em">Théâtre · Périgueux</text>
+</svg>

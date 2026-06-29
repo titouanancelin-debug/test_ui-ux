@@ -1,0 +1,36 @@
+<svg width="560" height="420" viewBox="0 0 560 420" xmlns="http://www.w3.org/2000/svg">
+  <rect width="560" height="420" fill="#F4E8D5"/>
+
+  <text x="24" y="36" font-family="Georgia, serif" font-size="18" font-weight="400" letter-spacing="0.08em" fill="#2A1418">TYPOGRAPHIE</text>
+  <text x="24" y="54" font-family="Georgia, serif" font-size="11" font-style="italic" fill="#2A1418" opacity="0.6">Cie Rouletabille Théâtre · Saison 2025–2026</text>
+
+  <!-- Divider -->
+  <line x1="24" y1="66" x2="536" y2="66" stroke="#2A1418" stroke-width="0.5" stroke-opacity="0.2"/>
+
+  <!-- Fraunces -->
+  <text x="24" y="90" font-family="Georgia, serif" font-size="10" letter-spacing="0.12em" fill="#B84A2E" opacity="0.8">TITRES / DISPLAY</text>
+  <text x="24" y="126" font-family="Georgia, serif" font-size="36" font-style="italic" fill="#2A1418">Fraunces</text>
+  <text x="24" y="152" font-family="Georgia, serif" font-size="18" font-style="italic" fill="#2A1418" opacity="0.7">La scène comme territoire du vivant</text>
+  <text x="24" y="170" font-family="Georgia, serif" font-size="12" font-style="italic" fill="#2A1418" opacity="0.5">Aa Bb Cc Dd Ee Ff Gg — 0 1 2 3 4 5 6 7 8 9</text>
+
+  <line x1="24" y1="184" x2="536" y2="184" stroke="#2A1418" stroke-width="0.5" stroke-opacity="0.12"/>
+
+  <!-- Inter -->
+  <text x="24" y="206" font-family="Arial, sans-serif" font-size="10" letter-spacing="0.12em" fill="#B84A2E" opacity="0.8">CORPS DE TEXTE</text>
+  <text x="24" y="238" font-family="Arial, sans-serif" font-size="32" fill="#2A1418">Inter</text>
+  <text x="24" y="262" font-family="Arial, sans-serif" font-size="15" fill="#2A1418" opacity="0.7">Compagnie de théâtre fondée en 1993 à Périgueux</text>
+  <text x="24" y="280" font-family="Arial, sans-serif" font-size="12" fill="#2A1418" opacity="0.5">Regular · Medium · SemiBold — abcdefghijklmnopqrstuvwxyz</text>
+
+  <line x1="24" y1="294" x2="536" y2="294" stroke="#2A1418" stroke-width="0.5" stroke-opacity="0.12"/>
+
+  <!-- JetBrains Mono -->
+  <text x="24" y="316" font-family="Georgia, serif" font-size="10" letter-spacing="0.12em" fill="#B84A2E" opacity="0.8">MONOSPACE / LABELS</text>
+  <text x="24" y="346" font-family="'Courier New', monospace" font-size="28" fill="#2A1418">JetBrains Mono</text>
+  <text x="24" y="368" font-family="'Courier New', monospace" font-size="13" fill="#2A1418" opacity="0.7">SPECTACLE  ATELIER  RÉSIDENCE  14h → 16h</text>
+
+  <line x1="24" y1="382" x2="536" y2="382" stroke="#2A1418" stroke-width="0.5" stroke-opacity="0.12"/>
+
+  <!-- Caveat -->
+  <text x="24" y="396" font-family="Georgia, serif" font-size="10" letter-spacing="0.12em" fill="#B84A2E" opacity="0.8">MANUSCRIT</text>
+  <text x="200" y="412" font-family="Georgia, serif" font-size="14" font-style="italic" fill="#2A1418" opacity="0.45">Caveat — citations, annotations</text>
+</svg>

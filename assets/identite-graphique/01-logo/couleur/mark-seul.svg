@@ -1,0 +1,16 @@
+<svg width="64" height="80" viewBox="0 0 64 80" xmlns="http://www.w3.org/2000/svg">
+  <!-- Mark seul : physalis lanterne — version couleur -->
+  <g transform="translate(32,76) scale(0.5)">
+    <path d="M0,0 C-52,-18,-75,-60,-50,-100 C-28,-122,0,-132,0,-132" stroke="#B84A2E" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M0,0 C52,-18,75,-60,50,-100 C28,-122,0,-132,0,-132" stroke="#B84A2E" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M0,0 C-26,-14,-44,-52,-28,-92 C-14,-118,0,-132,0,-132" stroke="#B84A2E" stroke-width="1.8" fill="none" opacity=".7" stroke-linecap="round"/>
+    <path d="M0,0 C26,-14,44,-52,28,-92 C14,-118,0,-132,0,-132" stroke="#B84A2E" stroke-width="1.8" fill="none" opacity=".7" stroke-linecap="round"/>
+    <path d="M0,0 C1,-32,0,-82,0,-132" stroke="#B84A2E" stroke-width="1.2" fill="none" opacity=".55" stroke-linecap="round"/>
+    <path d="M-42,-30 C-15,-38,15,-38,42,-30" stroke="#B84A2E" stroke-width="2.2" fill="none" opacity=".55"/>
+    <path d="M-60,-56 C-24,-64,24,-64,60,-56" stroke="#B84A2E" stroke-width="1.9" fill="none" opacity=".48"/>
+    <path d="M-64,-82 C-24,-90,24,-90,64,-82" stroke="#B84A2E" stroke-width="1.6" fill="none" opacity=".42"/>
+    <ellipse cx="0" cy="-66" rx="22" ry="24" fill="#B84A2E" opacity=".92"/>
+    <ellipse cx="-7" cy="-74" rx="6" ry="7" fill="rgba(255,255,255,0.22)"/>
+    <circle cx="0" cy="-132" r="3" fill="#B84A2E" opacity=".55"/>
+  </g>
+</svg>
