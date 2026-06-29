@@ -30,6 +30,9 @@ const Lantern = ({ x = 0, y = 0, scale = 1, color = "#F5C842", berry = "#E8571A"
         {/* top bud */}
         <circle cx="0" cy="-132" r="3.2" fill={color} opacity=".6"/>
       </g>
+      {/* filaments — dérivent indépendamment du balancement */}
+      <path d="M-22,-44 C-10,-42,4,-46,22,-43" stroke={color} strokeWidth="0.5" fill="none" vectorEffect="non-scaling-stroke" className="anim-filament" style={{ "--fil-dur": "3.1s", animationDelay: `${delay + 0.7}s` }}/>
+      <path d="M-26,-82 C-12,-79,6,-84,24,-80" stroke={color} strokeWidth="0.4" fill="none" vectorEffect="non-scaling-stroke" className="anim-filament" style={{ "--fil-dur": "2.6s", animationDelay: `${delay + 1.5}s` }}/>
     </g>
   );
 };
