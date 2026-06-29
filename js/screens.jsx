@@ -20,6 +20,7 @@ const ATELIER_CATS = [
 const Nav = ({ route, setRoute, setAtelierAudience }) => {
   const [scrolled, setScrolled] = useState(false);
   const [atelierOpen, setAtelierOpen] = useState(false);
+  const [mobileOpen, setMobileOpen]   = useState(false);
   const dropdownRef = useRef(null);
 
   useEffect(() => {
@@ -37,6 +38,8 @@ const Nav = ({ route, setRoute, setAtelierAudience }) => {
     return () => document.removeEventListener("mousedown", onClickOutside);
   }, []);
 
+  const go = (r) => { setRoute(r); setMobileOpen(false); setAtelierOpen(false); };
+
   const items = [
     { id:"home", label:"Accueil" },
     { id:"spectacles", label:"Notre travail" },
@@ -48,7 +51,7 @@ const Nav = ({ route, setRoute, setAtelierAudience }) => {
 
   return (
     <nav className={`nav ${scrolled ? "is-scrolled" : ""}`}>
-      <div className="nav-logo" onClick={() => setRoute("home")} style={{ cursor:"pointer" }}>
+      <div className="nav-logo" onClick={() => go("home")} style={{ cursor:"pointer" }}>
         <MotifMark size={32} color="var(--terra)"/>
         <span>Cie Rouletabille</span>
       </div>
@@ -107,6 +110,22 @@ const Nav = ({ route, setRoute, setAtelierAudience }) => {
         </div>
 
         <button className="nav-cta" onClick={() => setRoute("agenda")}>Réserver</button>
+      </div>
+
+      {/* Hamburger — mobile only */}
+      <button className={`nav-burger ${mobileOpen ? "is-open" : ""}`} onClick={() => setMobileOpen(o => !o)} aria-label="Menu">
+        <span/><span/><span/>
+      </button>
+
+      {/* Overlay mobile */}
+      <div className={`nav-mobile ${mobileOpen ? "open" : ""}`}>
+        {items.map(it => (
+          <button key={it.id} className={`nav-mobile-link ${route.startsWith(it.id) ? "active" : ""}`} onClick={() => go(it.id)}>
+            {it.label}
+          </button>
+        ))}
+        <button className="nav-mobile-link" onClick={() => { setAtelierAudience(""); go("ateliers"); }}>Ateliers</button>
+        <button className="btn btn-amber" onClick={() => go("agenda")} style={{ marginTop:28, alignSelf:"flex-start" }}>Réserver →</button>
       </div>
     </nav>
   );
@@ -177,17 +196,17 @@ const ParallaxHero = ({ setRoute }) => {
         }}/>
 
         {/* Image flottante droite haute */}
-        <div ref={float0} style={floatStyle("7%", ["right","21%"], "18%")}>
+        <div ref={float0} className="hero-float" style={floatStyle("7%", ["right","21%"], "18%")}>
           <div style={{ paddingTop:"135%", background:`url(${HERO_F0}) center/cover` }}/>
         </div>
 
         {/* Image flottante droite */}
-        <div ref={float1} style={floatStyle("32%", ["right","2%"], "17%")}>
+        <div ref={float1} className="hero-float" style={floatStyle("32%", ["right","2%"], "17%")}>
           <div style={{ paddingTop:"125%", background:`url(${HERO_F1}) center/cover` }}/>
         </div>
 
         {/* Image flottante gauche basse */}
-        <div ref={float2} style={{ ...floatStyle("auto", ["left","7%"], "15%"), bottom:"18%" }}>
+        <div ref={float2} className="hero-float" style={{ ...floatStyle("auto", ["left","7%"], "15%"), bottom:"18%" }}>
           <div style={{ paddingTop:"115%", background:`url(${HERO_F2}) center/cover` }}/>
         </div>
 
@@ -253,7 +272,7 @@ const Home = ({ setRoute, setSpectacle }) => {
         <h2 className="section-title">Spectacles<br/><span className="display-italic">à l'affiche.</span></h2>
         <div className="section-meta">Six créations en répertoire, du conte musical au théâtre brut. <a className="link-underline" onClick={() => setRoute("spectacles")}>Tous les spectacles →</a></div>
       </Reveal>
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:"var(--grid-gap)" }}>
+      <div className="grid-4">
         {SPECTACLES.slice(0,4).map((s,i) => (
           <Reveal key={s.id} variant="up" delay={i*90}>
             <SpectacleCard s={s} variant={i % 4} onClick={() => { setSpectacle(s.id); setRoute("spectacles/detail"); }}/>
@@ -283,7 +302,7 @@ const Home = ({ setRoute, setSpectacle }) => {
       <div ref={useParallax(0.22, 130)} className="motif-bg" style={{ right:-100, top:-80, opacity:0.4 }}>
         <Motif size={500} color="var(--paper)" berryColor="var(--amber)" rotate={20} seed={3.2}/>
       </div>
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1.3fr", gap:80, alignItems:"center", position:"relative", zIndex:2 }}>
+      <div className="col-duo" style={{ gap:80, alignItems:"center", position:"relative", zIndex:2 }}>
         <Reveal variant="left">
           <div className="eyebrow" style={{ color:"var(--amber)", marginBottom:24 }}>La compagnie</div>
           <h2 className="display" style={{ fontSize:"clamp(48px, 6vw, 84px)" }}>
@@ -334,9 +353,7 @@ const AgendaRow = ({ d, onClick }) => {
     sold:      { label:"Complet", color:"var(--ink-soft)" },
   }[d.status];
   return (
-    <div className="agenda-row" style={{
-      display:"grid", gridTemplateColumns:"110px 1fr 1fr 180px 140px 60px",
-      alignItems:"center", gap:24,
+    <div className="agenda-row agenda-row-grid" style={{
       padding:"24px 8px", borderTop:"1px solid var(--rule)",
       cursor:"pointer", transition:"background 0.2s"
     }}
@@ -351,13 +368,12 @@ const AgendaRow = ({ d, onClick }) => {
       <div>
         <h4 className="display" style={{ fontSize:28, lineHeight:1.05 }}>{d.title}</h4>
       </div>
-      <div style={{ fontFamily:"var(--ff-body)", fontSize:14, color:"var(--ink-soft)" }}>{d.venue}</div>
-      <div className="mono">{d.time} · {d.price}</div>
+      <div className="agenda-col-venue" style={{ fontFamily:"var(--ff-body)", fontSize:14, color:"var(--ink-soft)" }}>{d.venue}</div>
+      <div className="agenda-col-price mono">{d.time} · {d.price}</div>
       <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-        <span style={{ width:6, height:6, borderRadius:"50%", background:status.color }}/>
-        <span style={{ fontSize:11, color:status.color, fontWeight:500 }}>{status.label}</span>
+        {status && <><span style={{ width:6, height:6, borderRadius:"50%", background:status.color }}/><span style={{ fontSize:11, color:status.color, fontWeight:500 }}>{status.label}</span></>}
       </div>
-      <div style={{ textAlign:"right", fontSize:18 }}>→</div>
+      <div className="agenda-col-arrow" style={{ textAlign:"right", fontSize:18 }}>→</div>
     </div>
   );
 };
@@ -427,7 +443,7 @@ const Spectacles = ({ setRoute, setSpectacle }) => {
           <div ref={useParallax(0.2, 120)} className="motif-bg" style={{ right:-50, top:0, opacity:0.2 }}>
             <Motif size={420} color="var(--terra)" berryColor="var(--amber)" rotate={15} seed={2}/>
           </div>
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"var(--grid-gap)" }}>
+          <div className="grid-3">
             {SPECTACLES.map((s, i) => {
               const status = getStatus(s);
               return (
@@ -466,7 +482,7 @@ const Spectacles = ({ setRoute, setSpectacle }) => {
             </p>
           </Reveal>
           {residences.length > 0 ? (
-            <div style={{ display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:"var(--grid-gap)" }}>
+            <div className="grid-2">
               {residences.map((d, i) => (
                 <Reveal key={i} variant="up" delay={i * 100}>
                   <div style={{ padding:32, border:"1px solid rgba(242,228,200,0.15)" }}>
@@ -496,7 +512,7 @@ const Spectacles = ({ setRoute, setSpectacle }) => {
               La transmission artistique est une activité centrale, pas accessoire. Ateliers réguliers, interventions scolaires, actions de territoire — {ATELIERS.length} ateliers cette saison.
             </p>
           </Reveal>
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"var(--grid-gap)", marginBottom:48 }}>
+          <div className="grid-3" style={{ marginBottom:48 }}>
             {ATELIERS.slice(0, 3).map((a, i) => (
               <Reveal key={a.num} variant="up" delay={i * 80}>
                 <div className="noise" style={{ background:a.color, color:a.textColor, padding:28, minHeight:220, display:"flex", flexDirection:"column", justifyContent:"space-between", position:"relative", overflow:"hidden" }}>
@@ -530,7 +546,7 @@ const FicheSpectacle = ({ id, setRoute, setSpectacle }) => {
     <>
       <section className="section" style={{ paddingBottom:40 }}>
         <button className="nav-link" onClick={() => setRoute("spectacles")} style={{ paddingLeft:0, marginBottom:24 }}>← Notre travail</button>
-        <div style={{ display:"grid", gridTemplateColumns:"1fr 1.2fr", gap:64, alignItems:"start" }}>
+        <div className="col-split" style={{ gap:64, alignItems:"start" }}>
           <div className="noise" style={{ position:"relative", aspectRatio:"4/5", overflow:"hidden" }}>
             <Poster bg={s.color} ink={s.textColor} title={s.title} subtitle={s.tag} num={s.num} variant={2}/>
           </div>
@@ -731,7 +747,7 @@ const Agenda = ({ setRoute, setSpectacle }) => {
             Aucun rendez-vous ce mois-ci.
           </p>
         ) : (
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"var(--grid-gap)" }}>
+          <div className="grid-3">
             {list.map((d, i) => (
               <Reveal key={i} variant="up" delay={(i % 3) * 70}>
                 <AgendaCard
@@ -799,7 +815,7 @@ const Ateliers = ({ audience = "" }) => {
         {list.length === 0 ? (
           <p style={{ color:"var(--ink-soft)", fontStyle:"italic" }}>Aucun atelier dans cette catégorie pour le moment.</p>
         ) : (
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"var(--grid-gap)" }}>
+          <div className="grid-3">
             {list.map((a,i) => (
               <Reveal key={a.num} variant="scale" delay={(i % 3) * 80} style={{ display:"flex" }}>
               <article className="noise" style={{ flex:1, background:a.color, color:a.textColor, padding:32, position:"relative", overflow:"hidden", minHeight:340, cursor:"pointer", display:"flex", flexDirection:"column", justifyContent:"space-between" }}
@@ -849,7 +865,7 @@ const Equipe = () => {
         <h2 className="section-title">Huit <span className="display-italic">artistes,</span><br/>une compagnie.</h2>
         <div className="section-meta">L'équipe permanente et associée de la compagnie. Survolez ou cliquez pour lire la biographie.</div>
       </div>
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1.4fr", gap:64, alignItems:"start" }}>
+      <div className="col-split" style={{ gap:64, alignItems:"start" }}>
         <div>
           {EQUIPE.map((p,i) => (
             <div key={p.name}
@@ -899,7 +915,7 @@ const Partenaires = () => {
       {Object.entries(groups).map(([type, list]) => (
         <div key={type} style={{ marginBottom:48 }}>
           <div className="eyebrow" style={{ marginBottom:24 }}>{type}</div>
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:0, borderTop:"1px solid var(--rule-strong)" }}>
+          <div className="grid-4" style={{ gap:0, borderTop:"1px solid var(--rule-strong)" }}>
             {list.map(p => (
               <div key={p.name} style={{
                 padding:"32px 24px", borderRight:"1px solid var(--rule)", borderBottom:"1px solid var(--rule)",
@@ -929,7 +945,7 @@ const Contact = () => {
           <h2 className="section-title">Écrivez-<span className="display-italic">nous,</span><br/>passez nous voir.</h2>
           <div className="section-meta">Bureau ouvert du lundi au vendredi, 9h–17h. Pour les ateliers et l'action culturelle, écrivez-nous à l'adresse ci-dessous.</div>
         </div>
-        <div style={{ display:"grid", gridTemplateColumns:"1fr 1.3fr", gap:80 }}>
+        <div className="col-duo" style={{ gap:80 }}>
           <div>
             <div style={{ marginBottom:32 }}>
               <div className="mono" style={{ marginBottom:8, opacity:0.5 }}>Adresse</div>
@@ -968,7 +984,7 @@ const Contact = () => {
               </div>
             ) : (
               <form onSubmit={e => { e.preventDefault(); setSent(true); }} style={{ display:"grid", gap:16 }}>
-                <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16 }}>
+                <div className="grid-2" style={{ gap:16 }}>
                   <input className="input" placeholder="Nom" required/>
                   <input className="input" placeholder="Email" type="email" required/>
                 </div>
@@ -998,7 +1014,7 @@ const Newsletter = () => {
   const [done, setDone] = useState(false);
   return (
     <section className="section" style={{ background:"var(--amber)", color:"var(--ink)", paddingTop:64, paddingBottom:64 }}>
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:48, alignItems:"center" }}>
+      <div className="col-newsletter">
         <h2 className="display" style={{ fontSize:"clamp(40px, 5vw, 72px)" }}>
           La saison<br/><span className="display-italic">par lettre.</span>
         </h2>
@@ -1021,7 +1037,7 @@ const Newsletter = () => {
 /* ======================= FOOTER ======================= */
 const Footer = ({ setRoute }) => (
   <footer className="footer">
-    <div style={{ display:"grid", gridTemplateColumns:"1.4fr 1fr 1fr 1fr", gap:48, marginBottom:48 }}>
+    <div className="col-footer" style={{ marginBottom:48 }}>
       <div>
         <div className="nav-logo" style={{ color:"var(--paper)", fontSize:32, marginBottom:16 }}>
           <MotifMark size={36} color="var(--amber)"/>
@@ -1057,7 +1073,7 @@ const Footer = ({ setRoute }) => (
         </ul>
       </div>
     </div>
-    <div style={{ borderTop:"1px solid color-mix(in oklab, var(--paper) 20%, transparent)", paddingTop:24, display:"flex", justifyContent:"space-between", fontSize:12, opacity:0.6 }}>
+    <div style={{ borderTop:"1px solid color-mix(in oklab, var(--paper) 20%, transparent)", paddingTop:24, display:"flex", justifyContent:"space-between", flexWrap:"wrap", gap:8, fontSize:12, opacity:0.6 }}>
       <span>© 2025 Compagnie Rouletabille Théâtre — Tous droits réservés</span>
       <span>Saison 2025 — 2026 · Périgueux</span>
     </div>
