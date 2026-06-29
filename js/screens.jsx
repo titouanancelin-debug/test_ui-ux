@@ -203,7 +203,7 @@ const ParallaxHero = ({ setRoute }) => {
         <div style={{ position:"relative", zIndex:5, padding:"0 var(--pad-x)", maxWidth:640,
           height:"100%", display:"flex", flexDirection:"column", justifyContent:"center" }}>
           <Reveal variant="fade" delay={50} className="eyebrow" style={{ color:"var(--amber)", marginBottom:24 }}>
-            Saison 2025 — 2026 · Toulon & tournée
+            Saison 2025 — 2026 · Périgueux & Dordogne
           </Reveal>
           <h1 className="display" style={{ fontSize:"clamp(56px, 8vw, 118px)", marginBottom:28, color:"var(--paper)" }}>
             <KineticTitle lineDelay={110} baseDelay={150} lines={[
@@ -212,7 +212,7 @@ const ParallaxHero = ({ setRoute }) => {
             ]}/>
           </h1>
           <Reveal variant="up" delay={500} as="p" style={{ fontSize:18, lineHeight:1.6, color:"color-mix(in oklab, var(--paper) 82%, transparent)", textWrap:"pretty", maxWidth:460, marginBottom:32 }}>
-            Compagnie de création installée à Toulon depuis 2014. Des spectacles qui traversent les frontières du réel et du fantastique, ouverts à tous.
+            Compagnie de création installée à Périgueux depuis 1993. Des spectacles, des ateliers et des rencontres artistiques ouverts à tous, ancrés dans le territoire.
           </Reveal>
           <Reveal variant="up" delay={620} style={{ display:"flex", gap:12, flexWrap:"wrap" }}>
             <button className="btn btn-amber" onClick={() => setRoute("spectacles")}>Découvrir les spectacles →</button>
@@ -240,7 +240,7 @@ const Home = ({ setRoute, setSpectacle }) => {
       <div className="marquee-track">
         {[...Array(2)].map((_,k) => (
           <span key={k} className="marquee-item">
-            Théâtre <span className="marquee-sep"/> Danse-théâtre <span className="marquee-sep"/> Conte musical <span className="marquee-sep"/> Ateliers enfants <span className="marquee-sep"/> Médiation culturelle <span className="marquee-sep"/> Création collective <span className="marquee-sep"/> Tournée 2026 <span className="marquee-sep"/>
+            Théâtre <span className="marquee-sep"/> Danse-théâtre <span className="marquee-sep"/> Ateliers enfants <span className="marquee-sep"/> Médiation culturelle <span className="marquee-sep"/> Création collective <span className="marquee-sep"/> Filature de l'Isle · Périgueux <span className="marquee-sep"/> Droits culturels <span className="marquee-sep"/>
           </span>
         ))}
       </div>
@@ -294,10 +294,10 @@ const Home = ({ setRoute, setSpectacle }) => {
         </Reveal>
         <Reveal variant="right" delay={120}>
           <p style={{ fontSize:18, lineHeight:1.6, color:"color-mix(in oklab, var(--paper) 88%, transparent)", marginBottom:24, textWrap:"pretty" }}>
-            La pratique et l'accompagnement artistiques sont au cœur du projet de la Cie Rouletabille. Chaque saison, plus de dix-sept projets d'interventions sont élaborés en partenariat avec des structures sociales, éducatives et médico-sociales du territoire.
+            Depuis 1993, la Cie Rouletabille crée des projets artistiques pour permettre à chacun de découvrir, pratiquer et partager la culture. Son action s'inscrit dans une réflexion permanente autour de l'accès à la culture pour tous, en particulier pour les publics éloignés des institutions culturelles traditionnelles.
           </p>
           <p style={{ fontSize:18, lineHeight:1.6, color:"color-mix(in oklab, var(--paper) 88%, transparent)", marginBottom:32 }}>
-            Une compagnie qui pense le spectacle vivant comme un geste partagé, où la salle commence dans la rue et le plateau dans l'écoute.
+            Installée à la Filature de l'Isle à Périgueux depuis 2008 — labellisée « Lieu de fabrique » par la Région Nouvelle-Aquitaine — la compagnie mène chaque saison plus de 17 projets d'interventions artistiques en partenariat avec des structures sociales, éducatives et médico-sociales du territoire.
           </p>
           <button className="btn btn-amber" onClick={() => setRoute("equipe")}>Rencontrer l'équipe →</button>
         </Reveal>
@@ -649,7 +649,7 @@ const Ateliers = ({ audience = "" }) => {
         <Reveal variant="up" className="section-head">
           <div className="section-num">№ 03 / Pratiques</div>
           <h2 className="section-title">Ateliers<br/><span className="display-italic">& pratiques.</span></h2>
-          <div className="section-meta">{ATELIERS.length} ateliers réguliers, du jeu enfant à la médiation en milieu social. Inscriptions ouvertes pour la saison 2026.</div>
+          <div className="section-meta">{ATELIERS.length} ateliers réguliers à la Filature de l'Isle et en quartier. Activités gratuites ou à tarif accessible. Inscriptions ouvertes pour la saison 2025–2026.</div>
         </Reveal>
 
         {/* Filtre par public */}
@@ -767,7 +767,7 @@ const Partenaires = () => {
       <div className="section-head">
         <div className="section-num">№ 05 / Soutiens</div>
         <h2 className="section-title">Partenaires<br/><span className="display-italic">& soutiens.</span></h2>
-        <div className="section-meta">La compagnie est conventionnée par la DRAC PACA et soutenue par les collectivités territoriales du sud-est.</div>
+        <div className="section-meta">La compagnie est labellisée « Lieu de fabrique » par la Région Nouvelle-Aquitaine et l'Agence Culturelle de la Dordogne. Plus de 20 partenaires contribuent activement à la vie du lieu et des projets.</div>
       </div>
       {Object.entries(groups).map(([type, list]) => (
         <div key={type} style={{ marginBottom:48 }}>
@@ -800,28 +800,37 @@ const Contact = () => {
         <div className="section-head">
           <div className="section-num">№ 06 / Nous joindre</div>
           <h2 className="section-title">Écrivez-<span className="display-italic">nous,</span><br/>passez nous voir.</h2>
-          <div className="section-meta">Atelier ouvert le mercredi après-midi. Pour la billetterie scolaire ou groupes, écrivez à Nadia.</div>
+          <div className="section-meta">Bureau ouvert du lundi au vendredi, 9h–17h. Pour les ateliers et l'action culturelle, écrivez-nous à l'adresse ci-dessous.</div>
         </div>
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1.3fr", gap:80 }}>
           <div>
             <div style={{ marginBottom:32 }}>
               <div className="mono" style={{ marginBottom:8, opacity:0.5 }}>Adresse</div>
               <div style={{ fontFamily:"var(--ff-display)", fontStyle:"italic", fontSize:28, lineHeight:1.2 }}>
-                Atelier Rouletabille<br/>
-                14 rue Pierre Sémard<br/>
-                83000 Toulon
+                Compagnie Rouletabille Théâtre<br/>
+                15 ch. des feutres du Toulon<br/>
+                24000 Périgueux
               </div>
             </div>
             <div style={{ marginBottom:32 }}>
-              <div className="mono" style={{ marginBottom:8, opacity:0.5 }}>Diffusion · Production</div>
-              <div style={{ fontSize:18 }}>Nadia Pereira</div>
-              <div style={{ fontSize:18, color:"var(--terra)" }}>nadia@cie-rouletabille.fr</div>
-              <div className="mono" style={{ marginTop:4 }}>+33 (0)4 94 00 00 00</div>
+              <div className="mono" style={{ marginBottom:8, opacity:0.5 }}>Contact général</div>
+              <div style={{ fontSize:18, color:"var(--terra)" }}>rouletabilletheatre@gmail.com</div>
+              <div style={{ fontSize:18, color:"var(--terra)" }}>www.rouletabilletheatre.com</div>
+              <div className="mono" style={{ marginTop:8 }}>06 95 60 34 89</div>
+              <div className="mono">05 53 06 07 45</div>
+            </div>
+            <div style={{ marginBottom:32 }}>
+              <div className="mono" style={{ marginBottom:8, opacity:0.5 }}>Horaires bureau</div>
+              <div style={{ fontSize:16, lineHeight:1.7 }}>Lundi – Vendredi : 9h–17h</div>
             </div>
             <div>
-              <div className="mono" style={{ marginBottom:8, opacity:0.5 }}>Action culturelle · Ateliers</div>
-              <div style={{ fontSize:18 }}>Mira Solano</div>
-              <div style={{ fontSize:18, color:"var(--terra)" }}>ateliers@cie-rouletabille.fr</div>
+              <div className="mono" style={{ marginBottom:8, opacity:0.5 }}>Accès</div>
+              <div style={{ fontSize:14, lineHeight:1.7, color:"var(--ink-soft)" }}>
+                🚲 Points d'accroche autour de la Filature de l'Isle<br/>
+                🚌 Bus : « Salle Omnisports » (ligne A) ou « Privilège » (ligne e1)<br/>
+                🚗 Parking autour de la Filature de l'Isle<br/>
+                ♿ Rampe d'accès mobilité réduite disponible
+              </div>
             </div>
           </div>
           <div>
@@ -891,7 +900,7 @@ const Footer = ({ setRoute }) => (
           <MotifMark size={36} color="var(--amber)"/>
           <span>Cie Rouletabille</span>
         </div>
-        <p style={{ opacity:0.7, fontSize:14, lineHeight:1.6, maxWidth:340 }}>Compagnie de théâtre fondée en 2014 à Toulon. Conventionnée DRAC PACA.</p>
+        <p style={{ opacity:0.7, fontSize:14, lineHeight:1.6, maxWidth:340 }}>Compagnie de théâtre fondée en 1993 à Périgueux. Labellisée « Lieu de fabrique » Région Nouvelle-Aquitaine.</p>
       </div>
       <div>
         <div className="mono" style={{ marginBottom:14, opacity:0.5 }}>Découvrir</div>
@@ -914,16 +923,16 @@ const Footer = ({ setRoute }) => (
       <div>
         <div className="mono" style={{ marginBottom:14, opacity:0.5 }}>Suivre</div>
         <ul style={{ listStyle:"none", display:"flex", flexDirection:"column", gap:8, fontSize:14 }}>
-          <li>Instagram</li>
+          <li><a href="https://www.instagram.com/rouletabilletheatre" target="_blank" rel="noopener" style={{ color:"inherit", textDecoration:"none" }}>Instagram</a></li>
           <li>Facebook</li>
-          <li>Vimeo</li>
-          <li>Newsletter</li>
+          <li>HelloAsso</li>
+          <li onClick={() => {}} style={{ cursor:"pointer" }}>Newsletter</li>
         </ul>
       </div>
     </div>
     <div style={{ borderTop:"1px solid color-mix(in oklab, var(--paper) 20%, transparent)", paddingTop:24, display:"flex", justifyContent:"space-between", fontSize:12, opacity:0.6 }}>
-      <span>© 2026 Cie Rouletabille — Tous droits réservés</span>
-      <span>Saison 2025 — 2026</span>
+      <span>© 2025 Compagnie Rouletabille Théâtre — Tous droits réservés</span>
+      <span>Saison 2025 — 2026 · Périgueux</span>
     </div>
   </footer>
 );
