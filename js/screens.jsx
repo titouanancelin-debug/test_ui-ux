@@ -39,7 +39,7 @@ const Nav = ({ route, setRoute, setAtelierAudience }) => {
 
   const items = [
     { id:"home", label:"Accueil" },
-    { id:"spectacles", label:"Spectacles" },
+    { id:"spectacles", label:"Notre travail" },
     { id:"agenda", label:"Agenda" },
     { id:"equipe", label:"Équipe" },
     { id:"partenaires", label:"Partenaires" },
@@ -364,32 +364,114 @@ const AgendaRow = ({ d, onClick }) => {
 
 /* ======================= SPECTACLES (liste) ======================= */
 const Spectacles = ({ setRoute, setSpectacle }) => {
-  const [filter, setFilter] = useState("Tous");
-  const filters = ["Tous", "Théâtre", "Danse-théâtre", "Jeune public", "Création", "Conte musical"];
-  const list = SPECTACLES.filter(s => filter === "Tous" || s.tag === filter);
+  const residences = AGENDA.filter(d => d.type === "résidence");
+
+  const getStatus = (s) => {
+    const hasDates = AGENDA.some(d => d.spectacle === s.id);
+    if (s.id === "frontieres") return { label:"Création 2026", color:"var(--plum)" };
+    if (hasDates) return { label:"En diffusion", color:"var(--terra)" };
+    return { label:"Répertoire", color:"var(--ink-soft)" };
+  };
+
   return (
     <>
+      {/* ── Section 1 : Créations ── */}
       <section className="section" style={{ position:"relative", overflow:"hidden" }}>
-        <div ref={useParallax(0.2, 120)} className="motif-bg" style={{ right:-50, top:0, opacity:0.3 }}>
+        <div ref={useParallax(0.2, 120)} className="motif-bg" style={{ right:-50, top:0, opacity:0.25 }}>
           <Motif size={420} color="var(--terra)" berryColor="var(--amber)" rotate={15} seed={2}/>
         </div>
         <Reveal variant="up" className="section-head">
-          <div className="section-num">№ 01 / Répertoire</div>
-          <h2 className="section-title">Six <span className="display-italic">créations</span><br/>en répertoire.</h2>
-          <div className="section-meta">Six pièces de format et public différents, traversées par une même quête : faire entendre les voix qu'on n'entend pas.</div>
+          <div className="section-num">№ 01 / Créations</div>
+          <h2 className="section-title">Nos <span className="display-italic">créations</span><br/>en répertoire.</h2>
+          <div className="section-meta">Des formes vivantes traversées par une même quête : faire entendre les voix qu'on n'entend pas.</div>
         </Reveal>
-        <div style={{ display:"flex", gap:8, marginBottom:40, flexWrap:"wrap" }}>
-          {filters.map(f => (
-            <button key={f} className={`tweak-pill ${filter === f ? "active" : ""}`} onClick={() => setFilter(f)}>{f}</button>
-          ))}
-        </div>
         <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"var(--grid-gap)" }}>
-          {list.map((s,i) => (
-            <Reveal key={s.id} variant="up" delay={(i % 3) * 80}>
-              <SpectacleCard s={s} variant={i} onClick={() => { setSpectacle(s.id); setRoute("spectacles/detail"); }}/>
+          {SPECTACLES.map((s, i) => {
+            const status = getStatus(s);
+            return (
+              <Reveal key={s.id} variant="up" delay={(i % 3) * 80}>
+                <article className="card card-fx" onClick={() => { setSpectacle(s.id); setRoute("spectacles/detail"); }} style={{ cursor:"pointer", background:"transparent", border:"none" }}>
+                  <div className="card-img noise" style={{ aspectRatio:"4/5", position:"relative" }}>
+                    <Poster bg={s.color} ink={s.textColor} title={s.title} subtitle={s.tag} num={s.num} variant={i % 4}/>
+                    <div style={{ position:"absolute", top:12, left:12, background:status.color, color:"#fff", fontSize:10, fontWeight:700, letterSpacing:"0.08em", padding:"4px 10px", textTransform:"uppercase" }}>
+                      {status.label}
+                    </div>
+                  </div>
+                  <div style={{ padding:"16px 4px 8px", display:"flex", justifyContent:"space-between", alignItems:"baseline", borderTop:"1px solid var(--rule)", marginTop:12 }}>
+                    <div>
+                      <div className="tag" style={{ color:"var(--terra)", marginBottom:4 }}>{s.tag} · {s.duration}</div>
+                      <h3 className="display" style={{ fontSize:24, lineHeight:1.05 }}>{s.title}<span className="card-arrow">→</span></h3>
+                    </div>
+                    <div className="mono" style={{ opacity:0.6 }}>{s.ages}</div>
+                  </div>
+                </article>
+              </Reveal>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* ── Section 2 : La fabrique — résidences ── */}
+      <section className="section" style={{ background:"var(--aubergine)", color:"var(--paper)", position:"relative", overflow:"hidden" }}>
+        <div ref={useParallax(0.18, 100)} className="motif-bg" style={{ left:-80, bottom:-60, opacity:0.3 }}>
+          <Motif size={460} color="var(--paper)" berryColor="var(--amber)" rotate={-25} seed={1.8}/>
+        </div>
+        <Reveal variant="up" className="section-head" style={{ borderColor:"rgba(242,228,200,0.15)" }}>
+          <div className="section-num" style={{ color:"var(--amber)" }}>№ 02 / Fabrication</div>
+          <h2 className="section-title">La <span className="display-italic">fabrique</span><br/>en cours.</h2>
+          <div className="section-meta" style={{ color:"rgba(242,228,200,0.65)" }}>Les résidences de création sont le cœur de notre travail. Des semaines de répétition, d'expérimentation et de recherche, loin de la représentation.</div>
+        </Reveal>
+        {residences.length > 0 ? (
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:"var(--grid-gap)" }}>
+            {residences.map((d, i) => (
+              <Reveal key={i} variant="up" delay={i * 100}>
+                <div style={{ padding:32, border:"1px solid rgba(242,228,200,0.15)", position:"relative", overflow:"hidden" }}>
+                  <div style={{ position:"absolute", top:12, left:12, background:"var(--plum)", color:"#fff", fontSize:10, fontWeight:700, letterSpacing:"0.08em", padding:"4px 10px", textTransform:"uppercase" }}>Résidence</div>
+                  <div style={{ marginTop:32 }}>
+                    <h3 className="display" style={{ fontSize:"clamp(24px, 3vw, 36px)", marginBottom:12, lineHeight:1.05 }}>{d.title}</h3>
+                    <div className="mono" style={{ opacity:0.5, marginBottom:6 }}>{d.day} {d.month} {d.year}</div>
+                    <div style={{ fontSize:14, opacity:0.7, marginBottom:16 }}>{d.venue}</div>
+                    <div style={{ fontSize:13, opacity:0.55, fontStyle:"italic" }}>{d.price}</div>
+                  </div>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        ) : (
+          <p style={{ fontStyle:"italic", opacity:0.5 }}>Aucune résidence en cours actuellement.</p>
+        )}
+      </section>
+
+      {/* ── Section 3 : Médiations & transmissions ── */}
+      <section className="section" style={{ background:"var(--paper-warm)", position:"relative", overflow:"hidden" }}>
+        <div ref={useParallax(0.15, 90)} className="motif-bg" style={{ right:-60, top:-40, opacity:0.2 }}>
+          <Motif size={380} color="var(--amber-deep)" berryColor="var(--terra)" rotate={30} seed={3.5}/>
+        </div>
+        <Reveal variant="up" className="section-head">
+          <div className="section-num">№ 03 / Transmission</div>
+          <h2 className="section-title">Médiations<br/><span className="display-italic">& pratiques.</span></h2>
+          <div className="section-meta">La transmission artistique est une activité centrale, pas accessoire. Ateliers réguliers, interventions scolaires, actions de territoire.</div>
+        </Reveal>
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"var(--grid-gap)", marginBottom:48 }}>
+          {ATELIERS.slice(0, 3).map((a, i) => (
+            <Reveal key={a.num} variant="up" delay={i * 80}>
+              <div className="noise" style={{ background:a.color, color:a.textColor, padding:28, minHeight:220, display:"flex", flexDirection:"column", justifyContent:"space-between", position:"relative", overflow:"hidden" }}>
+                <div style={{ position:"absolute", right:-20, bottom:-30, opacity:0.12 }}>
+                  <Motif size={160} color={a.textColor} berryColor={a.textColor} rotate={10} seed={i+1}/>
+                </div>
+                <div>
+                  <div className="mono" style={{ marginBottom:16, opacity:0.6 }}>{a.num}</div>
+                  <h4 className="display" style={{ fontSize:26, lineHeight:1, marginBottom:10 }}>{a.title}</h4>
+                  <div style={{ fontSize:13, opacity:0.8 }}>{a.who}</div>
+                </div>
+                <div style={{ fontSize:13, opacity:0.7, borderTop:`1px solid ${a.textColor}`, paddingTop:14, marginTop:16, opacity:0.55 }}>{a.when}</div>
+              </div>
             </Reveal>
           ))}
         </div>
+        <Reveal variant="up">
+          <button className="btn" onClick={() => setRoute("ateliers")}>Voir tous les ateliers & médiations →</button>
+        </Reveal>
       </section>
     </>
   );
@@ -402,7 +484,7 @@ const FicheSpectacle = ({ id, setRoute, setSpectacle }) => {
   return (
     <>
       <section className="section" style={{ paddingBottom:40 }}>
-        <button className="nav-link" onClick={() => setRoute("spectacles")} style={{ paddingLeft:0, marginBottom:24 }}>← Tous les spectacles</button>
+        <button className="nav-link" onClick={() => setRoute("spectacles")} style={{ paddingLeft:0, marginBottom:24 }}>← Notre travail</button>
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1.2fr", gap:64, alignItems:"start" }}>
           <div className="noise" style={{ position:"relative", aspectRatio:"4/5", overflow:"hidden" }}>
             <Poster bg={s.color} ink={s.textColor} title={s.title} subtitle={s.tag} num={s.num} variant={2}/>
