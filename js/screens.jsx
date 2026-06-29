@@ -176,13 +176,13 @@ const ParallaxHero = ({ setRoute }) => {
           willChange:"clip-path, background-size",
         }}/>
 
-        {/* Image flottante gauche haute */}
-        <div ref={float0} style={floatStyle("10%", ["left","4%"], "20%")}>
+        {/* Image flottante droite haute — déplacée à droite pour libérer le texte */}
+        <div ref={float0} style={floatStyle("7%", ["right","21%"], "18%")}>
           <div style={{ paddingTop:"135%", background:`url(${HERO_F0}) center/cover` }}/>
         </div>
 
         {/* Image flottante droite */}
-        <div ref={float1} style={floatStyle("28%", ["right","3%"], "17%")}>
+        <div ref={float1} style={floatStyle("32%", ["right","2%"], "17%")}>
           <div style={{ paddingTop:"125%", background:`url(${HERO_F1}) center/cover` }}/>
         </div>
 
@@ -191,9 +191,9 @@ const ParallaxHero = ({ setRoute }) => {
           <div style={{ paddingTop:"115%", background:`url(${HERO_F2}) center/cover` }}/>
         </div>
 
-        {/* Dégradé gauche pour lisibilité texte */}
-        <div style={{ position:"absolute", inset:0, zIndex:2,
-          background:"linear-gradient(to right, rgba(26,14,8,0.88) 0%, rgba(26,14,8,0.55) 40%, rgba(26,14,8,0.08) 65%, transparent 100%)" }}/>
+        {/* Dégradé gauche — zIndex 4 pour couvrir les photos flottantes */}
+        <div style={{ position:"absolute", inset:0, zIndex:4,
+          background:"linear-gradient(to right, rgba(20,10,5,0.93) 0%, rgba(20,10,5,0.72) 38%, rgba(20,10,5,0.18) 62%, transparent 100%)" }}/>
 
         {/* Dégradé bas */}
         <div style={{ position:"absolute", bottom:0, left:0, right:0, height:180, zIndex:4,
@@ -205,7 +205,7 @@ const ParallaxHero = ({ setRoute }) => {
           <Reveal variant="fade" delay={50} className="eyebrow" style={{ color:"var(--amber)", marginBottom:24 }}>
             Saison 2025 — 2026 · Périgueux & Dordogne
           </Reveal>
-          <h1 className="display" style={{ fontSize:"clamp(56px, 8vw, 118px)", marginBottom:28, color:"var(--paper)" }}>
+          <h1 className="display" style={{ fontSize:"clamp(56px, 8vw, 118px)", marginBottom:28, color:"var(--paper)", textShadow:"0 2px 24px rgba(0,0,0,0.45)" }}>
             <KineticTitle lineDelay={110} baseDelay={150} lines={[
               <>Théâtre <span className="display-italic">vivant</span>,</>,
               <>corps & <span className="display-italic">voix</span>.</>,
