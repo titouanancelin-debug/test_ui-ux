@@ -549,36 +549,36 @@ const Agenda = ({ setRoute, setSpectacle }) => {
         <div className="section-meta">{AGENDA.length} rendez-vous · spectacles, ateliers, résidences & événements.</div>
       </Reveal>
 
-      {/* Filtre par type */}
-      <div style={{ display:"flex", gap:8, marginBottom:12, flexWrap:"wrap" }}>
-        {AGENDA_FILTERS.map(f => (
-          <button key={f.id}
-            className={`tweak-pill ${filter === f.id ? "active" : ""}`}
-            onClick={() => setFilter(f.id)}
-            style={ filter === f.id && f.id !== "tout" ? { background: TYPE_CONFIG[f.id]?.color, color:"#fff", borderColor: TYPE_CONFIG[f.id]?.color } : {} }
-          >
-            {f.label}
-            {f.id !== "tout" && (
-              <span style={{ marginLeft:6, fontSize:10, opacity:0.7 }}>
-                {AGENDA.filter(d => d.type === f.id).length}
-              </span>
-            )}
-          </button>
-        ))}
-      </div>
-
-      {/* Filtre par mois */}
-      <div style={{ display:"flex", gap:8, marginBottom:48, flexWrap:"wrap", alignItems:"center" }}>
-        <span style={{ fontSize:11, fontFamily:"var(--ff-mono)", letterSpacing:"0.1em", textTransform:"uppercase", opacity:0.45, marginRight:4 }}>Mois</span>
-        <button className={`tweak-pill ${month === "Tous" ? "active" : ""}`} onClick={() => setMonth("Tous")}>Tous</button>
-        {months.map(m => (
-          <button key={m.key}
-            className={`tweak-pill ${month === m.key ? "active" : ""}`}
-            onClick={() => setMonth(m.key)}
-          >
-            {m.label}
-          </button>
-        ))}
+      {/* Filtres : type à gauche, mois à droite */}
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", gap:16, marginBottom:48, flexWrap:"wrap" }}>
+        <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+          {AGENDA_FILTERS.map(f => (
+            <button key={f.id}
+              className={`tweak-pill ${filter === f.id ? "active" : ""}`}
+              onClick={() => setFilter(f.id)}
+              style={ filter === f.id && f.id !== "tout" ? { background: TYPE_CONFIG[f.id]?.color, color:"#fff", borderColor: TYPE_CONFIG[f.id]?.color } : {} }
+            >
+              {f.label}
+              {f.id !== "tout" && (
+                <span style={{ marginLeft:6, fontSize:10, opacity:0.7 }}>
+                  {AGENDA.filter(d => d.type === f.id).length}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+        <div style={{ display:"flex", gap:8, alignItems:"center", flexWrap:"wrap" }}>
+          <span style={{ fontSize:11, fontFamily:"var(--ff-mono)", letterSpacing:"0.1em", textTransform:"uppercase", opacity:0.45 }}>Mois</span>
+          <button className={`tweak-pill ${month === "Tous" ? "active" : ""}`} onClick={() => setMonth("Tous")}>Tous</button>
+          {months.map(m => (
+            <button key={m.key}
+              className={`tweak-pill ${month === m.key ? "active" : ""}`}
+              onClick={() => setMonth(m.key)}
+            >
+              {m.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Grille 3 colonnes */}
