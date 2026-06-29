@@ -12,6 +12,7 @@ function App() {
   // Persistent route
   const [route, setRouteRaw] = useState(() => localStorage.getItem("rt-route") || "home");
   const [spectacle, setSpectacle] = useState(() => localStorage.getItem("rt-spectacle") || "gens-de-peu");
+  const [atelierAudience, setAtelierAudience] = useState("");
   const setRoute = (r) => { setRouteRaw(r); localStorage.setItem("rt-route", r); window.scrollTo({ top:0, behavior:"smooth" }); };
   useEffect(() => { localStorage.setItem("rt-spectacle", spectacle); }, [spectacle]);
 
@@ -55,7 +56,7 @@ function App() {
   else if (route === "spectacles") screen = <Spectacles setRoute={setRoute} setSpectacle={setSpectacle}/>;
   else if (route === "spectacles/detail") screen = <FicheSpectacle id={spectacle} setRoute={setRoute} setSpectacle={setSpectacle}/>;
   else if (route === "agenda") screen = <Agenda setRoute={setRoute} setSpectacle={setSpectacle}/>;
-  else if (route === "ateliers") screen = <Ateliers/>;
+  else if (route === "ateliers") screen = <Ateliers audience={atelierAudience}/>;
   else if (route === "equipe") screen = <Equipe/>;
   else if (route === "partenaires") screen = <Partenaires/>;
   else if (route === "contact") screen = <Contact/>;
@@ -63,7 +64,7 @@ function App() {
 
   return (
     <div className="app" data-screen-label={route}>
-      <Nav route={route} setRoute={setRoute}/>
+      <Nav route={route} setRoute={setRoute} setAtelierAudience={setAtelierAudience}/>
       {screen}
       <Footer setRoute={setRoute}/>
       {tweaksOpen && (

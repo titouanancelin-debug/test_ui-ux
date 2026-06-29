@@ -6,23 +6,46 @@ import { SPECTACLES, AGENDA, ATELIERS, EQUIPE, PARTENAIRES } from './data.jsx';
 import { prefersReduced, Reveal, KineticTitle, useParallax } from './fx.jsx';
 
 /* ======================= NAV ======================= */
-const Nav = ({ route, setRoute }) => {
+const ATELIER_CATS = [
+  { id:"", label:"Tous les ateliers" },
+  { id:"enfants", label:"Enfants (6–11 ans)" },
+  { id:"ados", label:"Ados (12–17 ans)" },
+  { id:"adultes", label:"Adultes" },
+  { id:"ecole", label:"Milieu scolaire" },
+  { id:"seniors", label:"Personnes âgées" },
+  { id:"quartier", label:"Quartier & résidents" },
+  { id:"insertion", label:"Insertion sociale" },
+];
+
+const Nav = ({ route, setRoute, setAtelierAudience }) => {
   const [scrolled, setScrolled] = useState(false);
+  const [atelierOpen, setAtelierOpen] = useState(false);
+  const dropdownRef = React.useRef(null);
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  useEffect(() => {
+    const onClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setAtelierOpen(false);
+    };
+    document.addEventListener("mousedown", onClickOutside);
+    return () => document.removeEventListener("mousedown", onClickOutside);
+  }, []);
+
   const items = [
     { id:"home", label:"Accueil" },
     { id:"spectacles", label:"Spectacles" },
     { id:"agenda", label:"Agenda" },
-    { id:"ateliers", label:"Ateliers" },
     { id:"equipe", label:"Équipe" },
     { id:"partenaires", label:"Partenaires" },
     { id:"contact", label:"Contact" },
   ];
+
   return (
     <nav className={`nav ${scrolled ? "is-scrolled" : ""}`}>
       <div className="nav-logo" onClick={() => setRoute("home")} style={{ cursor:"pointer" }}>
@@ -35,6 +58,54 @@ const Nav = ({ route, setRoute }) => {
             {it.label}
           </button>
         ))}
+
+        {/* Ateliers avec dropdown */}
+        <div ref={dropdownRef} style={{ position:"relative" }}
+          onMouseEnter={() => setAtelierOpen(true)}
+          onMouseLeave={() => setAtelierOpen(false)}
+        >
+          <button
+            className={`nav-link ${route === "ateliers" ? "active" : ""}`}
+            onClick={() => { setAtelierAudience(""); setRoute("ateliers"); setAtelierOpen(false); }}
+            style={{ display:"flex", alignItems:"center", gap:4 }}
+          >
+            Ateliers
+            <span style={{ fontSize:9, opacity:0.55, marginTop:1, transition:"transform 0.2s", transform: atelierOpen ? "rotate(180deg)" : "rotate(0)" }}>▾</span>
+          </button>
+          {atelierOpen && (
+            <div style={{
+              position:"absolute", top:"calc(100% + 8px)", left:"50%", transform:"translateX(-50%)",
+              background:"var(--paper)", border:"1px solid var(--rule)",
+              boxShadow:"0 12px 32px rgba(0,0,0,0.13)", minWidth:210, zIndex:200,
+              padding:"6px 0",
+            }}>
+              {/* petit triangle */}
+              <div style={{ position:"absolute", top:-6, left:"50%", transform:"translateX(-50%)",
+                width:0, height:0, borderLeft:"6px solid transparent", borderRight:"6px solid transparent",
+                borderBottom:"6px solid var(--paper)", filter:"drop-shadow(0 -1px 0 var(--rule))" }}/>
+              {ATELIER_CATS.map((cat, i) => (
+                <button key={cat.id}
+                  onClick={() => { setAtelierAudience(cat.id); setRoute("ateliers"); setAtelierOpen(false); }}
+                  style={{
+                    display:"block", width:"100%", textAlign:"left",
+                    background:"none", border:"none", cursor:"pointer",
+                    padding: i === 0 ? "10px 20px 10px" : "8px 20px",
+                    fontSize:13, fontFamily:"var(--ff-body)",
+                    color: i === 0 ? "var(--terra)" : "var(--ink)",
+                    fontWeight: i === 0 ? 600 : 400,
+                    borderBottom: i === 0 ? "1px solid var(--rule)" : "none",
+                    transition:"background 0.15s",
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = "color-mix(in oklab, var(--terra) 7%, transparent)"}
+                  onMouseLeave={e => e.currentTarget.style.background = "none"}
+                >
+                  {cat.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
         <button className="nav-cta" onClick={() => setRoute("agenda")}>Réserver</button>
       </div>
     </nav>
@@ -369,48 +440,159 @@ const FicheSpectacle = ({ id, setRoute, setSpectacle }) => {
   );
 };
 
+/* ======================= AGENDA CARD ======================= */
+const TYPE_CONFIG = {
+  spectacle: { label:"Spectacle", color:"var(--terra)" },
+  atelier:   { label:"Atelier",   color:"var(--plum)" },
+  résidence: { label:"Résidence", color:"var(--aubergine)" },
+  événement: { label:"Évènement", color:"var(--amber-deep)" },
+};
+
+const STATUS_CONFIG = {
+  available: { label:"Places disponibles", color:"var(--terra)" },
+  few:       { label:"Dernières places",   color:"var(--amber-deep)" },
+  sold:      { label:"Complet",            color:"var(--ink-soft)" },
+  free:      { label:"Entrée libre",       color:"var(--plum)" },
+};
+
+const AgendaCard = ({ d, onClick }) => {
+  const tc = TYPE_CONFIG[d.type] || TYPE_CONFIG.spectacle;
+  const sc = STATUS_CONFIG[d.status] || STATUS_CONFIG.available;
+  const spectacleData = d.spectacle ? SPECTACLES.find(s => s.id === d.spectacle) : null;
+
+  return (
+    <article
+      onClick={onClick}
+      style={{ cursor: onClick ? "pointer" : "default", display:"flex", flexDirection:"column" }}
+      className={onClick ? "card card-fx" : ""}
+    >
+      {/* Visual header */}
+      <div style={{
+        position:"relative", aspectRatio:"3/2", overflow:"hidden",
+        background: spectacleData ? spectacleData.color : (d.cardColor || "var(--paper-warm)"),
+      }}>
+        {spectacleData && (
+          <div style={{ position:"absolute", inset:0 }}>
+            <Poster bg={spectacleData.color} ink={spectacleData.textColor} title={spectacleData.title} subtitle={spectacleData.tag} num={spectacleData.num} variant={1}/>
+          </div>
+        )}
+        {!spectacleData && (
+          <div style={{
+            position:"absolute", inset:0, display:"flex", alignItems:"center", justifyContent:"center", opacity:0.18,
+          }}>
+            <Motif size={180} color={d.cardTextColor || "var(--paper)"} berryColor={d.cardTextColor || "var(--paper)"} rotate={15} seed={2.5}/>
+          </div>
+        )}
+        {/* Type badge (pastille) */}
+        <div style={{
+          position:"absolute", top:12, left:12,
+          background: tc.color, color:"#fff",
+          fontSize:10, fontWeight:700, letterSpacing:"0.08em",
+          padding:"4px 10px", textTransform:"uppercase",
+        }}>
+          {tc.label}
+        </div>
+      </div>
+
+      {/* Text content — vraiment minimal */}
+      <div style={{ padding:"14px 0 8px", borderTop:"1px solid var(--rule)", marginTop:0 }}>
+        <h4 className="display" style={{ fontSize:20, lineHeight:1.05, marginBottom:6 }}>{d.title}</h4>
+        <div style={{ fontSize:12, color:"var(--ink-soft)", marginBottom:8, letterSpacing:"0.02em" }}>
+          {d.day} {d.month} {d.year} · {d.venue}
+        </div>
+        <div style={{ display:"flex", alignItems:"center", gap:6 }}>
+          <span style={{ width:5, height:5, borderRadius:"50%", background:sc.color, flexShrink:0 }}/>
+          <span style={{ fontSize:11, color:sc.color, fontWeight:500 }}>{sc.label}</span>
+        </div>
+      </div>
+    </article>
+  );
+};
+
 /* ======================= AGENDA ======================= */
+const AGENDA_FILTERS = [
+  { id:"tout",      label:"Tout" },
+  { id:"spectacle", label:"Spectacle" },
+  { id:"atelier",   label:"Atelier" },
+  { id:"résidence", label:"Résidence" },
+  { id:"événement", label:"Évènement" },
+];
+
 const Agenda = ({ setRoute, setSpectacle }) => {
-  const [month, setMonth] = useState("Tous");
-  const months = ["Tous", ...new Set(AGENDA.map(a => a.month + " " + a.year))];
-  const list = AGENDA.filter(a => month === "Tous" || (a.month + " " + a.year) === month);
-  const grouped = useMemo(() => {
-    const m = {};
-    list.forEach(d => {
-      const k = d.month + " " + d.year;
-      if (!m[k]) m[k] = [];
-      m[k].push(d);
-    });
-    return m;
-  }, [list]);
+  const [filter, setFilter] = useState("tout");
+
+  const list = useMemo(() =>
+    filter === "tout" ? AGENDA : AGENDA.filter(d => d.type === filter),
+  [filter]);
+
   return (
     <section className="section" style={{ position:"relative", overflow:"hidden" }}>
       <div ref={useParallax(0.18, 110)} className="motif-bg" style={{ right:-80, top:80, opacity:0.25 }}>
         <Motif size={380} color="var(--plum)" berryColor="var(--terra)" rotate={-20} seed={2.7}/>
       </div>
-      <div className="section-head">
+      <Reveal variant="up" className="section-head">
         <div className="section-num">№ 02 / Saison</div>
         <h2 className="section-title">Agenda<br/><span className="display-italic">2025 — 2026.</span></h2>
-        <div className="section-meta">{AGENDA.length} dates de mars à septembre 2026, en France et au festival d'Avignon.</div>
-      </div>
+        <div className="section-meta">{AGENDA.length} rendez-vous · spectacles, ateliers, résidences & événements.</div>
+      </Reveal>
+
+      {/* Bande de filtre par pastilles */}
       <div style={{ display:"flex", gap:8, marginBottom:48, flexWrap:"wrap" }}>
-        {months.map(m => (
-          <button key={m} className={`tweak-pill ${month === m ? "active" : ""}`} onClick={() => setMonth(m)}>{m}</button>
+        {AGENDA_FILTERS.map(f => (
+          <button key={f.id}
+            className={`tweak-pill ${filter === f.id ? "active" : ""}`}
+            onClick={() => setFilter(f.id)}
+            style={ filter === f.id && f.id !== "tout" ? { background: TYPE_CONFIG[f.id]?.color, color:"#fff", borderColor: TYPE_CONFIG[f.id]?.color } : {} }
+          >
+            {f.label}
+            {f.id !== "tout" && (
+              <span style={{ marginLeft:6, fontSize:10, opacity:0.7 }}>
+                {AGENDA.filter(d => d.type === f.id).length}
+              </span>
+            )}
+          </button>
         ))}
       </div>
-      {Object.entries(grouped).map(([k, items]) => (
-        <div key={k} style={{ marginBottom:48 }}>
-          <h3 className="display-italic" style={{ fontSize:36, marginBottom:8, color:"var(--terra)" }}>{k}</h3>
-          <div>{items.map((d,i) => <AgendaRow key={i} d={d} onClick={() => { setSpectacle(d.spectacle); setRoute("spectacles/detail"); }}/>)}</div>
+
+      {/* Grille 3 colonnes */}
+      {list.length === 0 ? (
+        <p style={{ color:"var(--ink-soft)", fontStyle:"italic" }}>Aucun rendez-vous dans cette catégorie pour le moment.</p>
+      ) : (
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"var(--grid-gap)" }}>
+          {list.map((d, i) => (
+            <Reveal key={i} variant="up" delay={(i % 3) * 70}>
+              <AgendaCard
+                d={d}
+                onClick={d.spectacle ? () => { setSpectacle(d.spectacle); setRoute("spectacles/detail"); } : null}
+              />
+            </Reveal>
+          ))}
         </div>
-      ))}
+      )}
     </section>
   );
 };
 
 /* ======================= ATELIERS ======================= */
-const Ateliers = () => {
+const AUDIENCE_FILTERS = [
+  { id:"",         label:"Tous" },
+  { id:"enfants",  label:"Enfants" },
+  { id:"ados",     label:"Ados" },
+  { id:"adultes",  label:"Adultes" },
+  { id:"ecole",    label:"Milieu scolaire" },
+  { id:"seniors",  label:"Personnes âgées" },
+  { id:"quartier", label:"Quartier" },
+  { id:"insertion",label:"Insertion sociale" },
+];
+
+const Ateliers = ({ audience = "" }) => {
+  const [filter, setFilter] = useState(audience);
   const [selected, setSelected] = useState(null);
+
+  useEffect(() => { setFilter(audience); setSelected(null); }, [audience]);
+
+  const list = filter ? ATELIERS.filter(a => a.audience === filter) : ATELIERS;
+
   return (
     <>
       <section className="section" style={{ position:"relative", overflow:"hidden" }}>
@@ -420,42 +602,64 @@ const Ateliers = () => {
         <Reveal variant="up" className="section-head">
           <div className="section-num">№ 03 / Pratiques</div>
           <h2 className="section-title">Ateliers<br/><span className="display-italic">& pratiques.</span></h2>
-          <div className="section-meta">Six ateliers réguliers, du jeu enfant à la médiation en milieu social. Inscriptions ouvertes pour la saison 2026.</div>
+          <div className="section-meta">{ATELIERS.length} ateliers réguliers, du jeu enfant à la médiation en milieu social. Inscriptions ouvertes pour la saison 2026.</div>
         </Reveal>
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"var(--grid-gap)" }}>
-          {ATELIERS.map((a,i) => (
-            <Reveal key={a.num} variant="scale" delay={(i % 3) * 80} style={{ display:"flex" }}>
-            <article className="noise" style={{ flex:1, background:a.color, color:a.textColor, padding:32, position:"relative", overflow:"hidden", minHeight:340, cursor:"pointer", display:"flex", flexDirection:"column", justifyContent:"space-between" }}
-              onClick={() => setSelected(selected === a.num ? null : a.num)}
+
+        {/* Filtre par public */}
+        <div style={{ display:"flex", gap:8, marginBottom:40, flexWrap:"wrap" }}>
+          {AUDIENCE_FILTERS.map(f => (
+            <button key={f.id}
+              className={`tweak-pill ${filter === f.id ? "active" : ""}`}
+              onClick={() => { setFilter(f.id); setSelected(null); }}
             >
-              <div style={{ position:"absolute", right:-30, bottom:-40, opacity:0.18 }}>
-                <Motif size={220} color={a.textColor} berryColor={a.textColor} rotate={20} seed={parseInt(a.num.slice(1))}/>
-              </div>
-              <div style={{ position:"relative", zIndex:2 }}>
-                <div className="mono" style={{ marginBottom:24 }}>№ {a.num}</div>
-                <h3 className="display" style={{ fontSize:36, lineHeight:1, marginBottom:14 }}>{a.title}</h3>
-                <div style={{ fontSize:14, opacity:0.85, marginBottom:18 }}>{a.who}</div>
-                <p style={{ fontSize:14, lineHeight:1.5, opacity:0.9, textWrap:"pretty" }}>{a.desc}</p>
-              </div>
-              <div style={{ position:"relative", zIndex:2, paddingTop:24, marginTop:24, borderTop:`1px solid ${a.textColor}`, opacity:0.95 }}>
-                <div className="mono" style={{ marginBottom:6 }}>{a.when}</div>
-                <div className="mono" style={{ marginBottom:6, opacity:0.7 }}>{a.where}</div>
-                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"baseline", marginTop:12 }}>
-                  <strong style={{ fontFamily:"var(--ff-display)", fontStyle:"italic", fontSize:22 }}>{a.price}</strong>
-                  <span>{selected === a.num ? "S'inscrire ↓" : "→"}</span>
-                </div>
-                {selected === a.num && (
-                  <form style={{ marginTop:16, display:"grid", gap:8 }} onClick={e => e.stopPropagation()} onSubmit={e => { e.preventDefault(); alert("Demande envoyée — nous revenons vers vous sous 48h."); setSelected(null); }}>
-                    <input className="input" placeholder="Nom" style={{ borderColor:a.textColor, color:a.textColor }} required/>
-                    <input className="input" placeholder="Email" type="email" style={{ borderColor:a.textColor, color:a.textColor }} required/>
-                    <button className="btn btn-amber" type="submit" style={{ width:"100%", justifyContent:"center" }}>Envoyer la demande</button>
-                  </form>
-                )}
-              </div>
-            </article>
-            </Reveal>
+              {f.label}
+              {f.id !== "" && (
+                <span style={{ marginLeft:6, fontSize:10, opacity:0.65 }}>
+                  {ATELIERS.filter(a => a.audience === f.id).length}
+                </span>
+              )}
+            </button>
           ))}
         </div>
+
+        {list.length === 0 ? (
+          <p style={{ color:"var(--ink-soft)", fontStyle:"italic" }}>Aucun atelier dans cette catégorie pour le moment.</p>
+        ) : (
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"var(--grid-gap)" }}>
+            {list.map((a,i) => (
+              <Reveal key={a.num} variant="scale" delay={(i % 3) * 80} style={{ display:"flex" }}>
+              <article className="noise" style={{ flex:1, background:a.color, color:a.textColor, padding:32, position:"relative", overflow:"hidden", minHeight:340, cursor:"pointer", display:"flex", flexDirection:"column", justifyContent:"space-between" }}
+                onClick={() => setSelected(selected === a.num ? null : a.num)}
+              >
+                <div style={{ position:"absolute", right:-30, bottom:-40, opacity:0.18 }}>
+                  <Motif size={220} color={a.textColor} berryColor={a.textColor} rotate={20} seed={parseInt(a.num.slice(1))}/>
+                </div>
+                <div style={{ position:"relative", zIndex:2 }}>
+                  <div className="mono" style={{ marginBottom:24 }}>№ {a.num}</div>
+                  <h3 className="display" style={{ fontSize:36, lineHeight:1, marginBottom:14 }}>{a.title}</h3>
+                  <div style={{ fontSize:14, opacity:0.85, marginBottom:18 }}>{a.who}</div>
+                  <p style={{ fontSize:14, lineHeight:1.5, opacity:0.9, textWrap:"pretty" }}>{a.desc}</p>
+                </div>
+                <div style={{ position:"relative", zIndex:2, paddingTop:24, marginTop:24, borderTop:`1px solid ${a.textColor}`, opacity:0.95 }}>
+                  <div className="mono" style={{ marginBottom:6 }}>{a.when}</div>
+                  <div className="mono" style={{ marginBottom:6, opacity:0.7 }}>{a.where}</div>
+                  <div style={{ display:"flex", justifyContent:"space-between", alignItems:"baseline", marginTop:12 }}>
+                    <strong style={{ fontFamily:"var(--ff-display)", fontStyle:"italic", fontSize:22 }}>{a.price}</strong>
+                    <span>{selected === a.num ? "S'inscrire ↓" : "→"}</span>
+                  </div>
+                  {selected === a.num && (
+                    <form style={{ marginTop:16, display:"grid", gap:8 }} onClick={e => e.stopPropagation()} onSubmit={e => { e.preventDefault(); alert("Demande envoyée — nous revenons vers vous sous 48h."); setSelected(null); }}>
+                      <input className="input" placeholder="Nom" style={{ borderColor:a.textColor, color:a.textColor }} required/>
+                      <input className="input" placeholder="Email" type="email" style={{ borderColor:a.textColor, color:a.textColor }} required/>
+                      <button className="btn btn-amber" type="submit" style={{ width:"100%", justifyContent:"center" }}>Envoyer la demande</button>
+                    </form>
+                  )}
+                </div>
+              </article>
+              </Reveal>
+            ))}
+          </div>
+        )}
       </section>
     </>
   );
