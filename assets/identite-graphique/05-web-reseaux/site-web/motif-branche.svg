@@ -1,0 +1,61 @@
+<svg width="280" height="300" viewBox="0 0 280 300" xmlns="http://www.w3.org/2000/svg">
+  <!-- Motif branche physalis — 3 lanternes (utilisé sur le site) -->
+  <!-- tige principale -->
+  <path d="M150,300 C148,260 145,235 142,205" stroke="#B84A2E" stroke-width="3" fill="none" stroke-linecap="round" opacity=".82"/>
+  <!-- branche gauche -->
+  <path d="M143,225 C118,196 86,150 60,108" stroke="#B84A2E" stroke-width="2.2" fill="none" stroke-linecap="round" opacity=".66"/>
+  <!-- branche droite -->
+  <path d="M145,212 C168,184 204,140 230,96" stroke="#B84A2E" stroke-width="2.2" fill="none" stroke-linecap="round" opacity=".66"/>
+  <!-- vrilles -->
+  <path d="M142,250 C130,244 118,242 108,246" stroke="#B84A2E" stroke-width="1" fill="none" stroke-linecap="round" opacity=".4"/>
+  <path d="M146,240 C158,234 172,232 182,236" stroke="#B84A2E" stroke-width="1" fill="none" stroke-linecap="round" opacity=".4"/>
+
+  <!-- Lanterne principale (x=142, y=205, scale=0.72) -->
+  <g transform="translate(142,205) scale(0.72)">
+    <path d="M0,0 C-52,-18,-75,-60,-50,-100 C-28,-122,0,-132,0,-132" stroke="#B84A2E" stroke-width="1.9" fill="none" opacity=".9" stroke-linecap="round"/>
+    <path d="M0,0 C52,-18,75,-60,50,-100 C28,-122,0,-132,0,-132" stroke="#B84A2E" stroke-width="1.9" fill="none" opacity=".9" stroke-linecap="round"/>
+    <path d="M0,0 C-26,-14,-44,-52,-28,-92 C-14,-118,0,-132,0,-132" stroke="#B84A2E" stroke-width="1.4" fill="none" opacity=".74" stroke-linecap="round"/>
+    <path d="M0,0 C26,-14,44,-52,28,-92 C14,-118,0,-132,0,-132" stroke="#B84A2E" stroke-width="1.4" fill="none" opacity=".74" stroke-linecap="round"/>
+    <path d="M0,0 C1,-32,0,-82,0,-132" stroke="#B84A2E" stroke-width="1.1" fill="none" opacity=".58" stroke-linecap="round"/>
+    <path d="M-42,-30 C-15,-38,15,-38,42,-30" stroke="#B84A2E" stroke-width="0.95" fill="none" opacity=".55"/>
+    <path d="M-60,-56 C-24,-64,24,-64,60,-56" stroke="#B84A2E" stroke-width="0.87" fill="none" opacity=".49"/>
+    <path d="M-64,-82 C-24,-90,24,-90,64,-82" stroke="#B84A2E" stroke-width="0.79" fill="none" opacity=".43"/>
+    <path d="M-46,-106 C-18,-113,18,-113,46,-106" stroke="#B84A2E" stroke-width="0.71" fill="none" opacity=".37"/>
+    <ellipse cx="0" cy="-66" rx="25" ry="27" fill="#E8B542" opacity=".92"/>
+    <ellipse cx="-8" cy="-74" rx="7" ry="8" fill="rgba(255,255,255,0.25)"/>
+    <circle cx="0" cy="-132" r="3.2" fill="#B84A2E" opacity=".6"/>
+  </g>
+
+  <!-- Lanterne gauche (x=60, y=108, scale=0.5) -->
+  <g transform="translate(60,108) scale(0.5)" opacity="0.92">
+    <path d="M0,0 C-52,-18,-75,-60,-50,-100 C-28,-122,0,-132,0,-132" stroke="#B84A2E" stroke-width="1.9" fill="none" opacity=".9" stroke-linecap="round"/>
+    <path d="M0,0 C52,-18,75,-60,50,-100 C28,-122,0,-132,0,-132" stroke="#B84A2E" stroke-width="1.9" fill="none" opacity=".9" stroke-linecap="round"/>
+    <path d="M0,0 C-26,-14,-44,-52,-28,-92 C-14,-118,0,-132,0,-132" stroke="#B84A2E" stroke-width="1.4" fill="none" opacity=".74" stroke-linecap="round"/>
+    <path d="M0,0 C26,-14,44,-52,28,-92 C14,-118,0,-132,0,-132" stroke="#B84A2E" stroke-width="1.4" fill="none" opacity=".74" stroke-linecap="round"/>
+    <path d="M0,0 C1,-32,0,-82,0,-132" stroke="#B84A2E" stroke-width="1.1" fill="none" opacity=".58" stroke-linecap="round"/>
+    <path d="M-42,-30 C-15,-38,15,-38,42,-30" stroke="#B84A2E" stroke-width="0.95" fill="none" opacity=".55"/>
+    <path d="M-60,-56 C-24,-64,24,-64,60,-56" stroke="#B84A2E" stroke-width="0.87" fill="none" opacity=".49"/>
+    <path d="M-64,-82 C-24,-90,24,-90,64,-82" stroke="#B84A2E" stroke-width="0.79" fill="none" opacity=".43"/>
+    <ellipse cx="0" cy="-66" rx="25" ry="27" fill="#E8B542" opacity=".92"/>
+    <ellipse cx="-8" cy="-74" rx="7" ry="8" fill="rgba(255,255,255,0.25)"/>
+    <circle cx="0" cy="-132" r="3.2" fill="#B84A2E" opacity=".6"/>
+  </g>
+
+  <!-- Lanterne droite (x=230, y=96, scale=0.46) -->
+  <g transform="translate(230,96) scale(0.46)" opacity="0.88">
+    <path d="M0,0 C-52,-18,-75,-60,-50,-100 C-28,-122,0,-132,0,-132" stroke="#B84A2E" stroke-width="1.9" fill="none" opacity=".9" stroke-linecap="round"/>
+    <path d="M0,0 C52,-18,75,-60,50,-100 C28,-122,0,-132,0,-132" stroke="#B84A2E" stroke-width="1.9" fill="none" opacity=".9" stroke-linecap="round"/>
+    <path d="M0,0 C-26,-14,-44,-52,-28,-92 C-14,-118,0,-132,0,-132" stroke="#B84A2E" stroke-width="1.4" fill="none" opacity=".74" stroke-linecap="round"/>
+    <path d="M0,0 C26,-14,44,-52,28,-92 C14,-118,0,-132,0,-132" stroke="#B84A2E" stroke-width="1.4" fill="none" opacity=".74" stroke-linecap="round"/>
+    <path d="M0,0 C1,-32,0,-82,0,-132" stroke="#B84A2E" stroke-width="1.1" fill="none" opacity=".58" stroke-linecap="round"/>
+    <path d="M-42,-30 C-15,-38,15,-38,42,-30" stroke="#B84A2E" stroke-width="0.95" fill="none" opacity=".55"/>
+    <path d="M-60,-56 C-24,-64,24,-64,60,-56" stroke="#B84A2E" stroke-width="0.87" fill="none" opacity=".49"/>
+    <ellipse cx="0" cy="-66" rx="25" ry="27" fill="#E8B542" opacity=".92"/>
+    <ellipse cx="-8" cy="-74" rx="7" ry="8" fill="rgba(255,255,255,0.25)"/>
+    <circle cx="0" cy="-132" r="3.2" fill="#B84A2E" opacity=".6"/>
+  </g>
+
+  <!-- bourgeons -->
+  <circle cx="108" cy="246" r="2.4" fill="#B84A2E" opacity=".4"/>
+  <circle cx="182" cy="236" r="2.4" fill="#B84A2E" opacity=".4"/>
+</svg>
