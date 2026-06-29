@@ -1,0 +1,59 @@
+<svg width="260" height="920" viewBox="0 0 260 920" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMax meet">
+  <!-- Physalis "growing plant" — animation d'intro du site
+       Fond terracotta (#B84A2E), lanternes papier (#F4E8D5), baies orange vif (#E8571A)
+       Tige principale + 4 branches + 5 lanternes -->
+
+  <rect width="260" height="920" fill="#B84A2E"/>
+
+  <!-- Définition réutilisable d'une lanterne -->
+  <defs>
+    <g id="gpl">
+      <path d="M0,0 C-52,-18,-75,-60,-50,-100 C-28,-122,0,-132,0,-132" stroke="#F4E8D5" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.9"/>
+      <path d="M0,0 C52,-18,75,-60,50,-100 C28,-122,0,-132,0,-132"  stroke="#F4E8D5" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.9"/>
+      <path d="M0,0 C-26,-14,-44,-52,-28,-92 C-14,-118,0,-132,0,-132" stroke="#F4E8D5" stroke-width="1.4" fill="none" stroke-linecap="round" opacity="0.7"/>
+      <path d="M0,0 C26,-14,44,-52,28,-92 C14,-118,0,-132,0,-132"   stroke="#F4E8D5" stroke-width="1.4" fill="none" stroke-linecap="round" opacity="0.7"/>
+      <path d="M0,0 C1,-32,0,-82,0,-132" stroke="#F4E8D5" stroke-width="1.1" fill="none" stroke-linecap="round" opacity="0.55"/>
+      <path d="M-42,-30 C-15,-38,15,-38,42,-30" stroke="#F4E8D5" stroke-width="0.95" fill="none" opacity="0.55"/>
+      <path d="M-60,-56 C-24,-64,24,-64,60,-56" stroke="#F4E8D5" stroke-width="0.85" fill="none" opacity="0.5"/>
+      <path d="M-64,-82 C-24,-90,24,-90,64,-82" stroke="#F4E8D5" stroke-width="0.75" fill="none" opacity="0.4"/>
+      <ellipse cx="0" cy="-66" rx="22" ry="24" fill="#E8571A" opacity="0.92"/>
+      <ellipse cx="-7" cy="-74" rx="6" ry="7" fill="rgba(255,255,255,0.22)"/>
+      <circle cx="0" cy="-132" r="3" fill="#F4E8D5" opacity="0.6"/>
+    </g>
+  </defs>
+
+  <!-- tige principale, du bas vers le haut -->
+  <path d="M130,930 C128,840 124,760 130,670 C136,580 122,490 128,390 C134,290 118,200 125,110 C128,60 130,20 130,20"
+        stroke="#F4E8D5" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.85"/>
+
+  <!-- branche gauche basse (y≈680) -->
+  <path d="M130,680 C104,658 70,630 38,598"
+        stroke="#F4E8D5" stroke-width="1.8" fill="none" stroke-linecap="round" opacity="0.72"/>
+
+  <!-- branche droite (y≈490) -->
+  <path d="M128,490 C156,468 192,444 224,418"
+        stroke="#F4E8D5" stroke-width="1.8" fill="none" stroke-linecap="round" opacity="0.72"/>
+
+  <!-- branche gauche haute (y≈300) -->
+  <path d="M126,300 C98,276 62,248 30,220"
+        stroke="#F4E8D5" stroke-width="1.6" fill="none" stroke-linecap="round" opacity="0.65"/>
+
+  <!-- branche droite haute (y≈150) -->
+  <path d="M127,150 C158,128 192,106 222,88"
+        stroke="#F4E8D5" stroke-width="1.6" fill="none" stroke-linecap="round" opacity="0.65"/>
+
+  <!-- L1 : bout branche gauche basse — scale 0.45 -->
+  <g transform="translate(38,598) scale(0.45)"><use href="#gpl"/></g>
+
+  <!-- L2 : bout branche droite — scale 0.5 -->
+  <g transform="translate(224,418) scale(0.5)"><use href="#gpl"/></g>
+
+  <!-- L3 : bout branche gauche haute — scale 0.52 -->
+  <g transform="translate(30,220) scale(0.52)"><use href="#gpl"/></g>
+
+  <!-- L4 : bout branche droite haute — scale 0.44 -->
+  <g transform="translate(222,88) scale(0.44)"><use href="#gpl"/></g>
+
+  <!-- L5 : sommet tige principale — scale 0.6, grande -->
+  <g transform="translate(130,20) scale(0.6)"><use href="#gpl"/></g>
+</svg>

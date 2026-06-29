@@ -1,0 +1,11 @@
+<svg width="40" height="44" viewBox="0 0 40 44" xmlns="http://www.w3.org/2000/svg">
+  <!-- MotifMark — picto physalis du nav (40×44) version terracotta -->
+  <g transform="translate(20,40) scale(0.26)">
+    <path d="M0,0 C-52,-18,-75,-60,-50,-100 C-28,-122,0,-132,0,-132" stroke="#B84A2E" stroke-width="3" fill="none"/>
+    <path d="M0,0 C52,-18,75,-60,50,-100 C28,-122,0,-132,0,-132" stroke="#B84A2E" stroke-width="3" fill="none"/>
+    <path d="M0,0 C1,-32,0,-82,0,-132" stroke="#B84A2E" stroke-width="2" fill="none"/>
+    <path d="M-42,-30 C-15,-38,15,-38,42,-30" stroke="#B84A2E" stroke-width="2.2" fill="none"/>
+    <path d="M-60,-56 C-24,-64,24,-64,60,-56" stroke="#B84A2E" stroke-width="2" fill="none"/>
+    <ellipse cx="0" cy="-66" rx="22" ry="24" fill="#E8B542"/>
+  </g>
+</svg>

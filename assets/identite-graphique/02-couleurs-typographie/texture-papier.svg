@@ -1,0 +1,36 @@
+<svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Texture papier — telle qu'utilisée sur le body du site
+       Combinaison : radial gradients subtils + hachures diagonales + noise fractal -->
+  <rect width="400" height="400" fill="#F4E8D5"/>
+
+  <!-- Vignette gauche -->
+  <radialGradient id="vg1" cx="20%" cy="30%" r="50%">
+    <stop offset="0%" stop-color="rgba(42,20,24,0.035)"/>
+    <stop offset="100%" stop-color="transparent"/>
+  </radialGradient>
+  <rect width="400" height="400" fill="url(#vg1)"/>
+
+  <!-- Vignette droite -->
+  <radialGradient id="vg2" cx="80%" cy="70%" r="55%">
+    <stop offset="0%" stop-color="rgba(42,20,24,0.04)"/>
+    <stop offset="100%" stop-color="transparent"/>
+  </radialGradient>
+  <rect width="400" height="400" fill="url(#vg2)"/>
+
+  <!-- Hachures diagonales 45° -->
+  <pattern id="hatch" patternUnits="userSpaceOnUse" width="3" height="3" patternTransform="rotate(45)">
+    <rect width="2" height="3" fill="transparent"/>
+    <rect x="2" width="1" height="3" fill="rgba(42,20,24,0.012)"/>
+  </pattern>
+  <rect width="400" height="400" fill="url(#hatch)"/>
+
+  <!-- Noise fractal -->
+  <filter id="noise">
+    <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2"/>
+    <feColorMatrix values="0 0 0 0 0.16 0 0 0 0 0.08 0 0 0 0 0.09 0 0 0 0.12 0"/>
+  </filter>
+  <rect width="400" height="400" filter="url(#noise)" opacity="0.5" style="mix-blend-mode:multiply"/>
+
+  <!-- Label -->
+  <text x="12" y="390" font-family="Georgia, serif" font-size="10" fill="#2A1418" opacity="0.35" font-style="italic">Texture papier — #F4E8D5 + hachures + noise fractal</text>
+</svg>
