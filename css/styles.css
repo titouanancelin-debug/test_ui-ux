@@ -244,13 +244,32 @@ h1, h2, h3 { font-family: var(--ff-display); font-weight: 400; letter-spacing:-0
 @keyframes breathe { 0%,100% { transform: scale(1); opacity:0.95 } 50% { transform: scale(1.06); opacity:1 } }
 @keyframes sway { 0%,100% { transform: rotate(-2deg) } 50% { transform: rotate(2deg) } }
 @keyframes vein { 0%,100% { opacity:0.55 } 50% { opacity:0.25 } }
+
+/* Vent — oscillation pendule irrégulière, pivot au point d'accroche sur la tige */
+@keyframes windSway {
+  0%   { transform: rotate(-9deg); }
+  18%  { transform: rotate(11deg); }
+  38%  { transform: rotate(-5deg); }
+  55%  { transform: rotate(10deg); }
+  75%  { transform: rotate(-7deg); }
+  88%  { transform: rotate(8deg); }
+  100% { transform: rotate(-9deg); }
+}
+.anim-wind {
+  transform-box: fill-box;
+  transform-origin: center bottom; /* pivot = point d'accroche sur la tige */
+  animation: windSway var(--wind-dur, 3.8s) ease-in-out infinite;
+  will-change: transform;
+}
+
 .anim-berry { transform-box: fill-box; transform-origin: center; animation: breathe var(--berry-dur, 4s) ease-in-out infinite; }
 .anim-vein { animation: vein 6s ease-in-out infinite; }
 
 /* reduce animation intensity */
-.anim-off .anim-berry, .anim-off .anim-vein, .anim-off .anim-sway { animation: none !important; }
+.anim-off .anim-berry, .anim-off .anim-vein, .anim-off .anim-sway, .anim-off .anim-wind { animation: none !important; }
 .anim-low .anim-berry { animation-duration: 8s; opacity: 0.9; }
 .anim-low .anim-vein { animation-duration: 10s; }
+.anim-low .anim-wind { animation-duration: 8s !important; }
 
 /* Marquee */
 .marquee {

@@ -12,21 +12,24 @@ const Lantern = ({ x = 0, y = 0, scale = 1, color = "#F5C842", berry = "#E8571A"
   ];
   return (
     <g transform={`translate(${x},${y}) scale(${scale})`} opacity={opacity}>
-      {/* ribs */}
-      <path d="M0,0 C-52,-18,-75,-60,-50,-100 C-28,-122,0,-132,0,-132" stroke={color} strokeWidth="1.9" fill="none" opacity=".9" vectorEffect="non-scaling-stroke"/>
-      <path d="M0,0 C52,-18,75,-60,50,-100 C28,-122,0,-132,0,-132" stroke={color} strokeWidth="1.9" fill="none" opacity=".9" vectorEffect="non-scaling-stroke"/>
-      <path d="M0,0 C-26,-14,-44,-52,-28,-92 C-14,-118,0,-132,0,-132" stroke={color} strokeWidth="1.4" fill="none" opacity=".74" vectorEffect="non-scaling-stroke"/>
-      <path d="M0,0 C26,-14,44,-52,28,-92 C14,-118,0,-132,0,-132" stroke={color} strokeWidth="1.4" fill="none" opacity=".74" vectorEffect="non-scaling-stroke"/>
-      <path d="M0,0 C1,-32,0,-82,0,-132" stroke={color} strokeWidth="1.1" fill="none" opacity=".58" vectorEffect="non-scaling-stroke"/>
-      {/* cage rings (veins) */}
-      {veinPaths.slice(0, veins).map((d, i) => (
-        <path key={i} d={d} stroke={color} strokeWidth={0.95 - i*0.08} fill="none" opacity={0.55 - i*0.06} className="anim-vein" style={{ animationDelay: `${i*0.9}s` }} vectorEffect="non-scaling-stroke"/>
-      ))}
-      {/* berry */}
-      <ellipse cx="0" cy="-66" rx="25" ry="27" fill={berry} opacity=".92" className="anim-berry" style={{ animationDelay: `${delay}s`, animationDuration: `${dur}s` }}/>
-      <ellipse cx="-8" cy="-74" rx="7" ry="8" fill="rgba(255,255,255,0.25)"/>
-      {/* top bud */}
-      <circle cx="0" cy="-132" r="3.2" fill={color} opacity=".6"/>
+      {/* inner group pivots at y=0 (attachment point) — transform-box:fill-box + transform-origin:center bottom */}
+      <g className="anim-wind" style={{ animationDelay: `${delay}s`, "--wind-dur": `${(dur * 0.88).toFixed(1)}s` }}>
+        {/* ribs */}
+        <path d="M0,0 C-52,-18,-75,-60,-50,-100 C-28,-122,0,-132,0,-132" stroke={color} strokeWidth="1.9" fill="none" opacity=".9" vectorEffect="non-scaling-stroke"/>
+        <path d="M0,0 C52,-18,75,-60,50,-100 C28,-122,0,-132,0,-132" stroke={color} strokeWidth="1.9" fill="none" opacity=".9" vectorEffect="non-scaling-stroke"/>
+        <path d="M0,0 C-26,-14,-44,-52,-28,-92 C-14,-118,0,-132,0,-132" stroke={color} strokeWidth="1.4" fill="none" opacity=".74" vectorEffect="non-scaling-stroke"/>
+        <path d="M0,0 C26,-14,44,-52,28,-92 C14,-118,0,-132,0,-132" stroke={color} strokeWidth="1.4" fill="none" opacity=".74" vectorEffect="non-scaling-stroke"/>
+        <path d="M0,0 C1,-32,0,-82,0,-132" stroke={color} strokeWidth="1.1" fill="none" opacity=".58" vectorEffect="non-scaling-stroke"/>
+        {/* cage rings (veins) */}
+        {veinPaths.slice(0, veins).map((d, i) => (
+          <path key={i} d={d} stroke={color} strokeWidth={0.95 - i*0.08} fill="none" opacity={0.55 - i*0.06} className="anim-vein" style={{ animationDelay: `${i*0.9}s` }} vectorEffect="non-scaling-stroke"/>
+        ))}
+        {/* berry */}
+        <ellipse cx="0" cy="-66" rx="25" ry="27" fill={berry} opacity=".92" className="anim-berry" style={{ animationDelay: `${delay}s`, animationDuration: `${dur}s` }}/>
+        <ellipse cx="-8" cy="-74" rx="7" ry="8" fill="rgba(255,255,255,0.25)"/>
+        {/* top bud */}
+        <circle cx="0" cy="-132" r="3.2" fill={color} opacity=".6"/>
+      </g>
     </g>
   );
 };
