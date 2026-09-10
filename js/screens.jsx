@@ -1,7 +1,7 @@
 /* Écrans : Home, Spectacles, FicheSpectacle, Agenda, Ateliers, Équipe, Partenaires, Contact */
 
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useSearchParams, Link } from 'react-router-dom';
 import { Motif, MotifHero, Poster } from './motif.jsx';
 import { useContent } from './content-context.jsx';
 import { urlFor } from './sanity-client.js';
@@ -116,15 +116,52 @@ const italicLastWord = (text) => {
 /* ======================= NAV ======================= */
 const toPath = (id) => (id === "home" ? "/" : "/" + id);
 
+/* Hauteur de la barre de navigation collante : ce que les barres collantes
+   placées en dessous (onglets de "Notre travail") doivent laisser libre. */
+const NAV_HEIGHT = 56;
+
+/* Onglets de la page "Notre travail". L'ordre et les libellés viennent de
+   Sanity (spectaclesPage.travailTabs) ; cette liste sert de repli tant que le
+   contenu n'est pas chargé et de garde-fou pour valider le paramètre d'URL —
+   les sections correspondantes sont, elles, codées dans Spectacles.
+   L'onglet actif est porté par l'URL (/notre-travail?onglet=ateliers) pour
+   qu'on puisse y renvoyer depuis l'agenda ou depuis le menu du haut. */
+const TRAVAIL_TABS = [
+  { value: "residences",  label: "Résidences artistiques" },
+  { value: "ateliers",    label: "Ateliers réguliers" },
+  { value: "evenements",  label: "Événements" },
+  { value: "mediations",  label: "Médiations" },
+  { value: "territoire",  label: "Projets de territoire" },
+];
+const TRAVAIL_TAB_DEFAULT = "residences";
+const isTravailTab = (v) => TRAVAIL_TABS.some(t => t.value === v);
+const travailTabPath = (value) =>
+  value === TRAVAIL_TAB_DEFAULT ? "/notre-travail" : `/notre-travail?onglet=${value}`;
+
 /* Les entrées d'agenda n'ont pas d'identifiant unique (contrairement aux
    spectacles) — le slug est dérivé du titre + de la date, ce qui est stable
    tant que ces champs ne changent pas et fonctionne aussi bien pour les
    entrées JSON que pour les occurrences d'ateliers générées à la volée. */
 
 const Nav = ({ route }) => {
-  const { MENU, SITE } = useContent();
+  const { MENU, SITE, SPECTACLES_PAGE } = useContent();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [searchParams] = useSearchParams();
+
+  /* Sous-entrées de "Notre travail" : les onglets de la page, accessibles
+     directement depuis le menu. Sur téléphone la barre d'onglets défile
+     horizontalement et passe facilement inaperçue — c'est ici qu'on voit
+     d'un coup d'œil que la page contient aussi les ateliers, les médiations
+     et les projets de territoire. Libellés repris de Sanity quand ils sont
+     chargés, sinon repli sur TRAVAIL_TABS. */
+  const travailSubItems = TRAVAIL_TABS.map(t => ({
+    ...t,
+    label: SPECTACLES_PAGE?.travailTabs?.find(s => s.value === t.value)?.label || t.label,
+  }));
+  const currentTravailTab = route.startsWith("notre-travail") && !route.includes("/")
+    ? (isTravailTab(searchParams.get("onglet")) ? searchParams.get("onglet") : TRAVAIL_TAB_DEFAULT)
+    : null;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -133,9 +170,16 @@ const Nav = ({ route }) => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  /* Le verrou de défilement doit porter sur <html> autant que sur <body> :
+     c'est <html> qui défile, un overflow:hidden posé sur le seul <body> ne
+     l'arrête pas et ferait glisser la page derrière le panneau ouvert. */
   useEffect(() => {
     document.body.classList.toggle("nav-mobile-active", mobileOpen);
-    return () => document.body.classList.remove("nav-mobile-active");
+    document.documentElement.classList.toggle("nav-mobile-active", mobileOpen);
+    return () => {
+      document.body.classList.remove("nav-mobile-active");
+      document.documentElement.classList.remove("nav-mobile-active");
+    };
   }, [mobileOpen]);
 
   const items = [
@@ -158,9 +202,27 @@ const Nav = ({ route }) => {
       </Link>
       <div className="nav-menu">
         {items.map(it => (
-          <Link key={it.id} to={toPath(it.id)} className={`nav-link ${route.startsWith(it.id) ? "active" : ""}`}>
-            {it.label}
-          </Link>
+          it.id === "notre-travail" ? (
+            <div key={it.id} className="nav-item-sub">
+              <Link to={toPath(it.id)} className={`nav-link ${route.startsWith(it.id) ? "active" : ""}`}>
+                {it.label}
+              </Link>
+              <div className="nav-submenu">
+                <div className="nav-submenu-panel">
+                  {travailSubItems.map(sub => (
+                    <Link key={sub.value} to={travailTabPath(sub.value)}
+                      className={`nav-submenu-link ${currentTravailTab === sub.value ? "active" : ""}`}>
+                      {sub.label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <Link key={it.id} to={toPath(it.id)} className={`nav-link ${route.startsWith(it.id) ? "active" : ""}`}>
+              {it.label}
+            </Link>
+          )
         ))}
         <Link to="/archives" className={`nav-link ${route.startsWith("archives") ? "active" : ""}`}>{MENU.labelArchives}</Link>
       </div>
@@ -173,9 +235,26 @@ const Nav = ({ route }) => {
       {/* Overlay mobile */}
       <div className={`nav-mobile ${mobileOpen ? "open" : ""}`}>
         {items.map(it => (
-          <Link key={it.id} to={toPath(it.id)} className={`nav-mobile-link ${route.startsWith(it.id) ? "active" : ""}`} onClick={() => setMobileOpen(false)} style={{ textDecoration:"none" }}>
-            {it.label}
-          </Link>
+          it.id === "notre-travail" ? (
+            <div key={it.id} className="nav-mobile-group">
+              <Link to={toPath(it.id)} className={`nav-mobile-link ${route.startsWith(it.id) ? "active" : ""}`} onClick={() => setMobileOpen(false)} style={{ textDecoration:"none" }}>
+                {it.label}
+              </Link>
+              <div className="nav-mobile-sub">
+                {travailSubItems.map(sub => (
+                  <Link key={sub.value} to={travailTabPath(sub.value)}
+                    className={`nav-mobile-sublink ${currentTravailTab === sub.value ? "active" : ""}`}
+                    onClick={() => setMobileOpen(false)} style={{ textDecoration:"none" }}>
+                    {sub.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <Link key={it.id} to={toPath(it.id)} className={`nav-mobile-link ${route.startsWith(it.id) ? "active" : ""}`} onClick={() => setMobileOpen(false)} style={{ textDecoration:"none" }}>
+              {it.label}
+            </Link>
+          )
         ))}
         <Link to="/archives" className={`nav-mobile-link ${route.startsWith("archives") ? "active" : ""}`} style={{ textDecoration:"none" }} onClick={() => setMobileOpen(false)}>{MENU.labelArchives}</Link>
       </div>
@@ -962,7 +1041,19 @@ const Spectacles = ({ setRoute }) => {
   const travailTabs = SPECTACLES_PAGE?.travailTabs || [];
   const tabConfig = (value) => travailTabs.find(t => t.value === value) || {};
   const audienceFilters = buildAudienceFilters(AGENDA_PAGE);
-  const [tab, setTab] = useState("residences");
+  /* L'onglet vit dans l'URL : ?onglet=ateliers est partageable et permet à
+     l'agenda et au menu du haut de pointer directement sur la bonne section.
+     Un paramètre absent ou inconnu retombe sur "residences". */
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlTab = searchParams.get("onglet");
+  const tab = isTravailTab(urlTab) ? urlTab : TRAVAIL_TAB_DEFAULT;
+  /* replace:true — cliquer sur les onglets ne doit pas empiler des entrées
+     d'historique : le bouton "retour" ramène à la page précédente. */
+  const setTab = (value) =>
+    setSearchParams(value === TRAVAIL_TAB_DEFAULT ? {} : { onglet: value }, { replace: true });
+  const tabsRef = useRef(null);        // conteneur défilant des onglets
+  const tabsAnchorRef = useRef(null);  // repère de position non collant, voir plus bas
+  const activeTabRef = useRef(null);
   const [atelierFilter, setAtelierFilter] = useState("");
   const [selectedAtelier, setSelectedAtelier] = useState(null);
   const [formStates, setFormStates] = useState({});
@@ -971,6 +1062,35 @@ const Spectacles = ({ setRoute }) => {
   const evenements  = sortByDate(liveAgenda.filter(d => d.type?.includes("événement")));
   const ateliersAgenda = groupAteliers(liveAgenda.filter(d => d.type?.includes("atelier")));
   const territoire  = sortByDate(liveAgenda.filter(d => d.type?.includes("projet de territoire")));
+
+  /* Arrivée sur un onglet précis (lien de l'agenda, sous-entrée du menu) : on
+     amène la barre d'onglets juste sous la nav, sinon on atterrit sur
+     l'en-tête de page sans voir la section demandée. requestAnimationFrame :
+     App remet le défilement à zéro à chaque changement d'URL (effet parent,
+     donc exécuté après celui-ci), on passe volontairement après lui. */
+  useEffect(() => {
+    if (!isTravailTab(urlTab)) return;
+    const frame = requestAnimationFrame(() => {
+      const anchor = tabsAnchorRef.current;
+      if (!anchor) return;
+      const top = anchor.getBoundingClientRect().top + window.scrollY - NAV_HEIGHT;
+      window.scrollTo({ top: Math.max(top, 0), behavior: "smooth" });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [urlTab]);
+
+  /* La barre d'onglets défile horizontalement : sur téléphone elle n'en montre
+     qu'un ou deux à la fois. On ramène l'onglet actif dans le champ de vision
+     pour qu'on voie toujours où on se trouve. */
+  useEffect(() => {
+    const scroller = tabsRef.current;
+    const active = activeTabRef.current;
+    if (!scroller || !active) return;
+    scroller.scrollTo({
+      left: Math.max(active.offsetLeft - (scroller.clientWidth - active.clientWidth) / 2, 0),
+      behavior: "smooth",
+    });
+  }, [tab, travailTabs.length]);
 
   const handleAtelierSubmit = async (e, atelier) => {
     e.preventDefault();
@@ -1007,17 +1127,22 @@ const Spectacles = ({ setRoute }) => {
 
       <SectionsLibres doc={{ sections: SPECTACLES_SECTIONS_HAUT }}/>
 
+      {/* Repère de position : la barre ci-dessous est collante, sa position
+          mesurée une fois collée ne dit plus où elle se trouve dans la page.
+          Ce div vide, lui, reste à sa place naturelle. */}
+      <div ref={tabsAnchorRef} aria-hidden="true"/>
+
       {/* Barre d'onglets sticky */}
-      <div style={{
-        position:"sticky", top:56, zIndex:20,
+      <div className="travail-tabs" style={{
+        position:"sticky", top:NAV_HEIGHT, zIndex:20,
         background:"color-mix(in oklab, var(--paper) 96%, transparent)",
         backdropFilter:"blur(10px)",
         borderBottom:"1px solid var(--rule-strong)",
       }}>
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"0 var(--pad-x)" }}>
-          <div style={{ display:"flex", overflowX:"auto", scrollbarWidth:"none", minWidth:0 }}>
+          <div ref={tabsRef} className="travail-tabs-scroller" style={{ display:"flex", position:"relative", overflowX:"auto", scrollbarWidth:"none", minWidth:0 }}>
             {travailTabs.map(t => (
-              <button key={t.value} onClick={() => setTab(t.value)} style={{
+              <button key={t.value} ref={tab === t.value ? activeTabRef : null} onClick={() => setTab(t.value)} style={{
                 flexShrink:0,
                 padding:"16px 24px 14px",
                 background:"none", border:"none",
@@ -1030,8 +1155,10 @@ const Spectacles = ({ setRoute }) => {
               </button>
             ))}
           </div>
-          {/* Titre de la section active */}
-          <span className="display-italic" style={{ flexShrink:0, fontSize:"clamp(18px, 2vw, 26px)", color:"var(--terra)", opacity:0.85, paddingRight:4 }}>
+          {/* Titre de la section active — masqué sur téléphone (cf. styles.css) :
+              il répète le libellé de l'onglet actif et mangeait toute la largeur,
+              au point de rendre les autres onglets invisibles. */}
+          <span className="display-italic travail-tabs-title" style={{ flexShrink:0, fontSize:"clamp(18px, 2vw, 26px)", color:"var(--terra)", opacity:0.85, paddingRight:4 }}>
             {travailTabs.find(t => t.value === tab)?.title}
           </span>
         </div>
@@ -1712,7 +1839,10 @@ const FicheAgenda = ({ setRoute }) => {
             <>
               {d.who && <div className="mono" style={{ marginBottom:32, opacity:0.6 }}>Public : {d.who}</div>}
               <div style={{ display:"flex", gap:12, flexWrap:"wrap" }}>
-                <button className="btn btn-amber" onClick={() => setRoute("ateliers")}>Voir tous les ateliers →</button>
+                {/* Vers l'onglet "Ateliers réguliers" de Notre travail, qui
+                    liste tous les ateliers avec l'ensemble de leurs séances —
+                    et non vers l'ancienne page /ateliers. */}
+                <Link className="btn btn-amber" to={travailTabPath("ateliers")} style={{ textDecoration:"none" }}>Voir tous les ateliers →</Link>
                 <button className="btn btn-ghost" onClick={() => setRoute("contact")}>S'inscrire</button>
               </div>
             </>

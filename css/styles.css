@@ -63,8 +63,13 @@
 .density-airy    { --pad-x: 80px; --pad-y: 110px; --grid-gap: 32px; }
 
 * { margin:0; padding:0; box-sizing:border-box; }
+/* overflow-x:hidden sur <html> seulement : sur <body>, il faisait de celui-ci
+   un conteneur de défilement, ce qui neutralisait silencieusement le
+   position:sticky de la barre de navigation — elle disparaissait dès qu'on
+   descendait dans la page, alors que tout le reste (ombre .is-scrolled, barre
+   d'onglets calée à 56px sous elle) suppose qu'elle reste visible. */
+html { overflow-x: hidden; }
 html, body {
-  overflow-x: hidden;
   background: var(--paper);
   color: var(--ink);
   font-family: var(--ff-body);
@@ -171,6 +176,34 @@ h1, h2, h3 { font-family: var(--ff-display); font-weight: 400; letter-spacing:-0
   cursor:pointer; letter-spacing:0.02em;
 }
 .nav-cta:hover { background: var(--terra-deep); }
+
+/* Sous-menu "Notre travail" (ordinateur) : les onglets de la page accessibles
+   directement depuis la barre du haut. Ouvert au survol et au focus clavier. */
+.nav-item-sub { position: relative; display: flex; align-items: center; }
+.nav-submenu {
+  position: absolute; top: 100%; left: 0; z-index: 60;
+  padding-top: 14px; /* pont invisible : garde le survol continu entre le lien et le panneau */
+  opacity: 0; visibility: hidden;
+  transition: opacity 0.15s ease, visibility 0.15s;
+}
+.nav-item-sub:hover .nav-submenu,
+.nav-item-sub:focus-within .nav-submenu { opacity: 1; visibility: visible; }
+.nav-submenu-panel {
+  min-width: 220px;
+  display: flex; flex-direction: column;
+  background: var(--paper);
+  border: 1px solid var(--rule-strong);
+  box-shadow: 0 18px 40px -26px rgba(42,20,24,0.75);
+  padding: 6px;
+}
+.nav-submenu-link {
+  font-family: var(--ff-body); font-size: 13px;
+  color: var(--ink); text-decoration: none;
+  padding: 9px 12px; white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+}
+.nav-submenu-link:hover { background: color-mix(in oklab, var(--terra) 15%, transparent); }
+.nav-submenu-link.active { color: var(--terra); font-weight: 600; }
 
 @media (max-width: 1180px) {
   .nav { padding: 12px 28px; }
@@ -610,6 +643,10 @@ html { scroll-behavior: smooth; }
   background:currentColor; border-radius:2px;
   transition:transform 0.25s, opacity 0.2s;
 }
+/* Panneau ouvert : le bouton passe en position fixe, sinon la croix de
+   fermeture reste accrochée à la barre de nav et sort de l'écran quand on a
+   ouvert le menu après avoir descendu la page. */
+.nav-burger.is-open { position:fixed; top:10px; right:18px; }
 .nav-burger.is-open span:nth-child(1) { transform:translateY(7px) rotate(45deg); }
 .nav-burger.is-open span:nth-child(2) { opacity:0; }
 .nav-burger.is-open span:nth-child(3) { transform:translateY(-7px) rotate(-45deg); }
@@ -628,8 +665,30 @@ html { scroll-behavior: smooth; }
 }
 .nav-mobile-link:hover, .nav-mobile-link.active { color:var(--terra); padding-left:8px; }
 
+/* Sous-entrées de "Notre travail" dans le menu plein écran : sur téléphone,
+   c'est le seul endroit d'où l'on atteint d'un geste les ateliers, les
+   médiations ou les projets de territoire. */
+.nav-mobile-group { display:flex; flex-direction:column; }
+.nav-mobile-sub {
+  display:flex; flex-direction:column;
+  padding:10px 0 14px 14px;
+  border-bottom:1px solid var(--rule);
+  border-left:2px solid color-mix(in oklab, var(--terra) 35%, transparent);
+  margin-left:2px;
+}
+.nav-mobile-sublink {
+  font-family:var(--ff-body); font-size:16px;
+  color:var(--ink-soft); padding:9px 0;
+  transition:color 0.15s, padding-left 0.15s;
+}
+.nav-mobile-sublink:hover, .nav-mobile-sublink.active { color:var(--terra); padding-left:6px; }
+
 /* Empêche la page de défiler derrière le panneau plein écran pendant qu'il est ouvert (voir Nav dans js/screens.jsx) */
-body.nav-mobile-active { overflow: hidden; }
+html.nav-mobile-active, body.nav-mobile-active { overflow: hidden; }
+
+/* Barre d'onglets de "Notre travail" — défilement horizontal sans barre de
+   défilement visible (le repère de défilement est le dégradé, cf. 768px). */
+.travail-tabs-scroller::-webkit-scrollbar { display: none; }
 
 /* ===================== BREAKPOINT 768px ===================== */
 @media (max-width: 768px) {
@@ -656,6 +715,19 @@ body.nav-mobile-active { overflow: hidden; }
 
   .agenda-row-grid { grid-template-columns: 72px 1fr auto; }
   .agenda-col-venue, .agenda-col-price, .agenda-col-arrow { display: none; }
+
+  /* Barre d'onglets de "Notre travail" : sur téléphone la légende en italique
+     répétait le libellé de l'onglet actif tout en occupant la moitié de la
+     largeur — on ne voyait plus qu'un seul onglet et rien n'indiquait que la
+     barre défilait. On la masque, on resserre les onglets, et un dégradé sur
+     le bord droit signale qu'il y a d'autres onglets à faire défiler. */
+  .travail-tabs-title { display: none; }
+  .travail-tabs-scroller button { padding: 14px 16px 12px; }
+  .travail-tabs::after {
+    content: ""; position: absolute; top: 0; right: 0; bottom: 1px; width: 42px;
+    pointer-events: none;
+    background: linear-gradient(to right, transparent, var(--paper) 78%);
+  }
 }
 
 @media (max-width: 480px) {
